@@ -11,8 +11,8 @@ public class Location extends AppCompatActivity {
         setContentView(R.layout.activity_location);
     }
 
-    private double Longitude = -122.353796 ;
-    private double Latitude =47.693299;
+    private double Longitude = 0;
+    private double Latitude =0;
 
     public double getLong() {
 

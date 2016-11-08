@@ -15,15 +15,16 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
 
     private GoogleMap mMap;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gpslocation);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
+
 
 
     /**
@@ -44,8 +45,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
 
         // Add a marker in Sydney and move the camera
         LatLng seattle = new LatLng(Latitude, Longitude);
-        mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
+
+
+            mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
 
 
     }
