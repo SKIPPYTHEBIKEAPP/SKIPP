@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     }
     /** Called when the user clicks the Send button */
     public void DisplayLocation(View view) {
-        Intent intent = new Intent(this, Location.class);
+        Intent intent = new Intent(this, GPSLocation.class);
 
         startActivity(intent);
     }
@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+
 
 
 

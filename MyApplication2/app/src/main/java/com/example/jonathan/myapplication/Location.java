@@ -10,4 +10,26 @@ public class Location extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
     }
+
+    private double Longitude = -122.353796 ;
+    private double Latitude =47.693299;
+
+    public double getLong() {
+
+        return Longitude;
+    }
+
+    public double getLat(){
+        return Latitude;
+
+
+    }
+    private void setLongitude(double Long){
+        this.Longitude = Long;
+
+    }
+
+    private void setLatitude(double Lat){
+        this.Latitude = Lat;
+}
 }
