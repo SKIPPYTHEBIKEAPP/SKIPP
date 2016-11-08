@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            
+
                             startActivity(intent);
                         }
                     });
