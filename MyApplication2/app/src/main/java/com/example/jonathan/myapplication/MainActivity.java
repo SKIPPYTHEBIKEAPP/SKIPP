@@ -27,21 +27,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /**
-     * Called when the user clicks the click button
-     * public void DisplayLocation(View view) {
-     * Intent intent = new Intent(this, Location.class);
-     * <p>
-     * startActivity(intent);
-     * }
-     * <p>
-     * /** Called when the user clicks the Send button
-     */
-    public void DisplayLogin(View view) {
-        Intent intent = new Intent(this, LoginActivity.class);
-
-        startActivity(intent);
-    }
 
     /**
      * Called when the user clicks the Send button
@@ -95,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+
 
 
 }
