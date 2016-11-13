@@ -6,16 +6,51 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 
-public class MainActivity extends AppCompatActivity {
+import org.joda.time.DateTime;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
 
+import java.text.DecimalFormat;
+import java.util.Date;
+
+import io.particle.android.sdk.cloud.*;
+
+public class MainActivity extends AppCompatActivity implements GPSUpdate {
+    private LocationHandler handler;
+    private double longi=0;
+    private double lati = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        new Thread(new Runnable() {
+            public void run() {
+
+                setContentView(R.layout.activity_main);
+            }
+        }).start();
+
+
+
     }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation();
+        LocationDataSource source = new DummyDataSource();
+        handler = new LocationHandler(source, 10000, login, this);
+        handler.subscribeUpdates(this);
+        handler.start();
+
+    }
+
+
 
     /**
      * Called when the user clicks the Send button
@@ -33,12 +68,14 @@ public class MainActivity extends AppCompatActivity {
      */
     public void DisplayLocation(View view) {
 
+
+
         //will call the location
         Location current = new Location();
         final Intent intent = new Intent(this, GPSLocation.class);
 
         //if location is set to zero no new location has been reported
-        if (current.getLat() == 0 && current.getLong() == 0) {
+        if (current.getLat() == 0 && current.getLon()==0) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
@@ -74,7 +111,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void DisplayBattery(View view) {
         Intent intent = new Intent(this, Location.class);
 
@@ -82,6 +121,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+    
+    public void receiveUpdate(GPSData data){
+
+
+    }
 
 
 }

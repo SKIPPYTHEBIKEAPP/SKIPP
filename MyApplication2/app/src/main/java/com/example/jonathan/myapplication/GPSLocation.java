@@ -2,6 +2,7 @@ package com.example.jonathan.myapplication;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,20 +11,40 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DecimalFormat;
+import java.util.Date;
 
-public class GPSLocation extends FragmentActivity implements OnMapReadyCallback {
+
+public class GPSLocation extends FragmentActivity implements OnMapReadyCallback, GPSUpdate {
 
     private GoogleMap mMap;
+    private LocationHandler handler;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gpslocation);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
+
+/*
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation();
+        LocationDataSource source = new DummyDataSource();
+        handler = new LocationHandler(source, 10000, login, this);
+        handler.subscribeUpdates(this);
+        handler.start();
+    }
+
+*/
 
 
 
@@ -38,13 +59,15 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
         Location current = new Location();
-        double Latitude = current.getLat();
-        double Longitude = current.getLong();
+        current.onStart();
+
+
 
         // Add a marker in Sydney and move the camera
-        LatLng seattle = new LatLng(Latitude, Longitude);
+        LatLng seattle = new LatLng(current.getLat(), current.getLon());
 
 
             mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
@@ -52,4 +75,19 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
 
 
     }
+    public void receiveUpdate(GPSData data, GoogleMap googleMap){
+        mMap = googleMap;
+        Location current = new Location();
+        current.onStart();
+
+
+
+        // Add a marker in Sydney and move the camera
+        LatLng seattle = new LatLng(current.getLat(), current.getLon());
+
+
+        mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
+    }
+
 }
