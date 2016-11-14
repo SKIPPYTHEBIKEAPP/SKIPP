@@ -22,12 +22,13 @@ public class Location extends AppCompatActivity implements GPSUpdate{
     @Override
     protected void onStart() {
         super.onStart();
-        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        handler = MainActivity.getHandler();
+        //LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
         //LocationDataSource source = new SkippyLocation();
-        LocationDataSource source = new DummyDataSource();
-        handler = new LocationHandler(source, 10000, login, this);
+        //LocationDataSource source = new DummyDataSource();
+        //handler = new LocationHandler(source, 10000, login, this);
         handler.subscribeUpdates(this);
-        handler.start();
+        //handler.start();
     }
 
     public double getLon(){
@@ -43,11 +44,10 @@ public class Location extends AppCompatActivity implements GPSUpdate{
     public void receiveUpdate(GPSData data) {
         TextView gpsView = (TextView)findViewById(R.id.GPSView);
         String update = "";
-        while (!data.valid) {
-
+        if (data.valid) {
             lat = data.lat;
             lon = data.lon;
-            break;
+            update = lat + " " + lon;
         }
 
         gpsView.append(update);

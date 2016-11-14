@@ -20,11 +20,8 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private LocationHandler handler;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gpslocation);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -32,19 +29,18 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
         mapFragment.getMapAsync(this);
     }
 
-/*
+
     @Override
     protected void onStart() {
         super.onStart();
-        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        handler = MainActivity.getHandler();
+        //LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
         //LocationDataSource source = new SkippyLocation();
-        LocationDataSource source = new DummyDataSource();
-        handler = new LocationHandler(source, 10000, login, this);
+        //LocationDataSource source = new DummyDataSource();
+        //handler = new LocationHandler(source, 10000, login, this);
         handler.subscribeUpdates(this);
-        handler.start();
+        //handler.start();
     }
-
-*/
 
 
 
@@ -59,35 +55,24 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
-        Location current = new Location();
-        current.onStart();
-
-
-
-        // Add a marker in Sydney and move the camera
-        LatLng seattle = new LatLng(current.getLat(), current.getLon());
-
-
-            mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
-
-
     }
-    public void receiveUpdate(GPSData data, GoogleMap googleMap){
-        mMap = googleMap;
-        Location current = new Location();
-        current.onStart();
 
+    public void receiveUpdate(GPSData data){
+        if (this.mMap != null) {
+            double lat = data.lat;
+            double lon = data.lon;
 
+            if (data.latDir == 'S')
+                lat *= -1;
+            if (data.lonDir == 'W')
+                lon *= -1;
 
-        // Add a marker in Sydney and move the camera
-        LatLng seattle = new LatLng(current.getLat(), current.getLon());
+            LatLng currentLocation = new LatLng(lat, lon);
 
-
-        mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
+            mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        }
     }
 
 }

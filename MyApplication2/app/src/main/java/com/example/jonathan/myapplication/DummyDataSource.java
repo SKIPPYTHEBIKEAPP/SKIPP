@@ -18,6 +18,6 @@ public class DummyDataSource implements LocationDataSource {
     }
 
     public GPSData getUpdate() {
-        return new GPSData(10, 10, 'N', 'W', 100, new Date(), true);
+        return new GPSData(47.6062, 122.3321, 'N', 'W', 100, new Date(), true);
     }
 }

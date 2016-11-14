@@ -19,9 +19,9 @@ import java.util.Date;
 import io.particle.android.sdk.cloud.*;
 
 public class MainActivity extends AppCompatActivity implements GPSUpdate {
-    private LocationHandler handler;
-    private double longi=0;
-    private double lati = 0;
+    private static LocationHandler handler;
+    private double lon = 0;
+    private double lat = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +32,6 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
                 setContentView(R.layout.activity_main);
             }
         }).start();
-
-
-
     }
 
     @Override
@@ -50,7 +47,9 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
     }
 
-
+    public static LocationHandler getHandler(){
+        return handler;
+    }
 
     /**
      * Called when the user clicks the Send button
@@ -67,15 +66,10 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void DisplayLocation(View view) {
-
-
-
-        //will call the location
-        Location current = new Location();
         final Intent intent = new Intent(this, GPSLocation.class);
 
         //if location is set to zero no new location has been reported
-        if (current.getLat() == 0 && current.getLon()==0) {
+        if (this.lat == 0 && this.lon==0) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
@@ -115,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void DisplayBattery(View view) {
-        Intent intent = new Intent(this, Location.class);
+        Intent intent = new Intent(this, Battery.class);
 
         startActivity(intent);
     }
@@ -124,7 +118,10 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
     
     public void receiveUpdate(GPSData data){
-
+        if (data.valid){
+            this.lat = data.lat;
+            this.lon = data.lon;
+        }
 
     }
 
