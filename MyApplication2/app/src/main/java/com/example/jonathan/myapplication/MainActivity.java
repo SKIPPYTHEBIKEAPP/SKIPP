@@ -26,12 +26,16 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new Thread(new Runnable() {
-            public void run() {
 
-                setContentView(R.layout.activity_main);
-            }
-        }).start();
+        // Not sure what this code does?  It manipulated the UI though, so it has to be done
+        // on the UI thread, so added I "runOnUiThread" to this.
+        this.runOnUiThread(
+            new Thread(new Runnable() {
+                public void run() {
+
+                    setContentView(R.layout.activity_main);
+                }
+            }));
     }
 
     @Override

@@ -56,6 +56,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        // Now that map has appeared, get a valid location instead of waiting for the
+        // interval timeout
+        handler.forceUpdate();
     }
 
     public void receiveUpdate(GPSData data){
