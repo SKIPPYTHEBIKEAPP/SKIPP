@@ -3,6 +3,7 @@ package com.example.jonathan.myapplication;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,14 +55,19 @@ public class LocationHandler {
     private final Object notificationSetLock = new Object();
                                                     // concurrency lock for notificationSet
     private GPSData lastData = null;                // last GPS data relieved
+    private boolean periodicUpdatesEnabled;         // Flag for whether automatic updates are enabled
+    private int minutesUntilStale;                  // Number of minutes before data is considered stale;
 
     public LocationHandler (LocationDataSource locationDataSource, long checkInterval,
+                            int minutesUntilStale,
                             LoginInformation loginInformation, Context context) {
         this.locationDataSource = locationDataSource;
         this.checkInterval = checkInterval;
         this.loginInformation = loginInformation;
         this.context = context;
         this.notificationSet = new HashSet<GPSUpdate>();
+        this.lastData = GPSData.invalidData();
+        this.minutesUntilStale = minutesUntilStale;
     }
 
     // Set the automatic GPS location update interval (in ms)
@@ -87,6 +93,19 @@ public class LocationHandler {
         this.updateThread = new Thread(new updateServiceThread(loginInformation, context,
                 locationDataSource, checkInterval));
         this.updateThread.start();
+    }
+
+    public void setAutomaticUpdates(boolean periodicUpdates) {
+        this.periodicUpdatesEnabled = periodicUpdates;
+    }
+
+    public boolean isDataStale(){
+        if (this.lastData != null && this.lastData.valid != false){
+            long diffTimeInMs = this.lastData.timeStamp.getTime() - new Date().getTime(); // in ms
+            long diffTimeInMinutes = Math.abs(diffTimeInMs / (1000 * 60));  // convert ms to minutes
+            return (diffTimeInMinutes > this.minutesUntilStale);
+        }
+        return true;
     }
 
     /* retrieveLastGPSData
@@ -133,7 +152,8 @@ public class LocationHandler {
                     });
                 try {
                     // Sleep until timeout interval or until interrupted
-                    Thread.sleep(this.checkInterval);
+                    while (!periodicUpdatesEnabled)
+                        Thread.sleep(this.checkInterval);
                 } catch (Exception e) {
                     // Thread interrupted for an immediate update
                 }

@@ -18,10 +18,8 @@ import java.util.Date;
 
 import io.particle.android.sdk.cloud.*;
 
-public class MainActivity extends AppCompatActivity implements GPSUpdate {
+public class MainActivity extends AppCompatActivity {
     private static LocationHandler handler;
-    private double lon = 0;
-    private double lat = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
         //LocationDataSource source = new SkippyLocation();
         LocationDataSource source = new DummyDataSource();
-        handler = new LocationHandler(source, 10000, login, this);
-        handler.subscribeUpdates(this);
+        handler = new LocationHandler(source, 30000, 15, login, this);
+        // handler.subscribeUpdates(this);
         handler.start();
 
     }
@@ -72,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     public void DisplayLocation(View view) {
         final Intent intent = new Intent(this, GPSLocation.class);
 
-        //if location is set to zero no new location has been reported
-        if (this.lat == 0 && this.lon==0) {
+        //Test to see if there is a recent location update
+        if (this.handler.isDataStale()) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
@@ -117,17 +115,4 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
         startActivity(intent);
     }
-
-
-
-    
-    public void receiveUpdate(GPSData data){
-        if (data.valid){
-            this.lat = data.lat;
-            this.lon = data.lon;
-        }
-
-    }
-
-
 }
