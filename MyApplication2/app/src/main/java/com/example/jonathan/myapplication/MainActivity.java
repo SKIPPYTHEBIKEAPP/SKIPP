@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import org.joda.time.DateTime;
@@ -34,19 +35,24 @@ public class MainActivity extends AppCompatActivity {
                     setContentView(R.layout.activity_main);
                 }
             }));
+
+        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation();
+        LocationDataSource source = new DummyDataSource();
+        handler = new LocationHandler(source, 30000, 15, login, this);
+        // handler.subscribeUpdates(this);
+        try {
+            handler.start();
+            Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     protected void onStart() {
 
         super.onStart();
-        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
-        //LocationDataSource source = new SkippyLocation();
-        LocationDataSource source = new DummyDataSource();
-        handler = new LocationHandler(source, 30000, 15, login, this);
-        // handler.subscribeUpdates(this);
-        handler.start();
-
     }
 
     public static LocationHandler getHandler(){

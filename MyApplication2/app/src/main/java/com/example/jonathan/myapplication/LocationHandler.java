@@ -2,6 +2,7 @@ package com.example.jonathan.myapplication;
 
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -57,6 +58,11 @@ public class LocationHandler {
     private GPSData lastData = null;                // last GPS data relieved
     private boolean periodicUpdatesEnabled;         // Flag for whether automatic updates are enabled
     private int minutesUntilStale;                  // Number of minutes before data is considered stale;
+    private volatile boolean connected;             // Flag to indicate if data source is connected
+    private volatile boolean fatalThreadError;      // Flag to indicate data source is not working
+    private volatile String threadErrorMessage;     // Error message in case of thread error
+    private final Object threadErrorLock = new Object();
+                                                    // concurrency lock for thread errors
 
     public LocationHandler (LocationDataSource locationDataSource, long checkInterval,
                             int minutesUntilStale,
@@ -68,6 +74,9 @@ public class LocationHandler {
         this.notificationSet = new HashSet<GPSUpdate>();
         this.lastData = GPSData.invalidData();
         this.minutesUntilStale = minutesUntilStale;
+        this.connected = false;
+        this.fatalThreadError = false;
+        this.threadErrorMessage = "";
     }
 
     // Set the automatic GPS location update interval (in ms)
@@ -76,9 +85,11 @@ public class LocationHandler {
     }
 
     // Cause an immediate GPS location update
-    public void forceUpdate() {
-        if (this.updateThread.isAlive())
+    public void forceUpdate() throws Exception {
+        if (this.connected && this.updateThread.isAlive())
             this.updateThread.interrupt();
+        else
+            this.start();
     }
 
     // Subscribe an object to be notified of GPS updates
@@ -89,14 +100,45 @@ public class LocationHandler {
     }
 
     // Begin the automated GPS location thread
-    public void start() {
+    public void start() throws Exception {
         this.updateThread = new Thread(new updateServiceThread(loginInformation, context,
                 locationDataSource, checkInterval));
         this.updateThread.start();
+        while (this.connected == false && this.fatalThreadError == false) {
+            // wait to see if connection is established
+            try {
+                Thread.sleep(300);
+                Log.d("GPS Connect", "Waiting for connection");
+            } catch (Exception e) {// sleep interrupted}
+            }
+        }
+        if (this.fatalThreadError == true)
+            synchronized (this.threadErrorLock) {
+                throw new Exception("Unable to connect: " + this.threadErrorMessage);
+            }
+        if (this.connected == false)
+            throw new Exception ("No error, but not connected.  This shouldn't happen.");
+    }
+
+    public void logout() {
+        this.connected = false;
+        if (updateThread != null && updateThread.isAlive())
+            updateThread.interrupt();
+        while (updateThread.isAlive()){
+            try {
+                Thread.sleep(300);
+                Log.d("GPS Connect", "Waiting for disconnection");
+            } catch (Exception e) {// sleep interrupted}
+            }
+        }
     }
 
     public void setAutomaticUpdates(boolean periodicUpdates) {
         this.periodicUpdatesEnabled = periodicUpdates;
+    }
+
+    public boolean isConnected(){
+        return this.connected;
     }
 
     public boolean isDataStale(){
@@ -134,12 +176,29 @@ public class LocationHandler {
         // Begin thread to update GPS information
         @Override
         public void run() {
-            this.locationDataSource.init(this.context);
-            this.locationDataSource.login(this.loginInformation);
-            while (true) {
-                final GPSData data = this.locationDataSource.getUpdate();
-                if (data.valid)     // Save result for future retrieval if data is valid
-                    lastData = data;
+            connected = false;
+            try {
+                this.locationDataSource.init(this.context);
+            } catch (Exception e) {
+                synchronized (threadErrorLock) {
+                    fatalThreadError = true;
+                    threadErrorMessage = "Unable to initialize data source: " + e.getMessage();
+                }
+            }
+            try {
+                this.locationDataSource.login(this.loginInformation);
+            } catch (Exception e) {
+                synchronized (threadErrorLock) {
+                    fatalThreadError = true;
+                    threadErrorMessage = "Unable to login: " + e.getMessage();
+                }
+            }
+            connected = true;
+            while (connected) {
+                try {
+                    final GPSData data = this.locationDataSource.getUpdate();
+                    if (data.valid)     // Save result for future retrieval if data is valid
+                        lastData = data;
                     // Notify all listeners of this new data if valid
                     ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
                         @Override
@@ -150,6 +209,13 @@ public class LocationHandler {
                             }
                         }
                     });
+                } catch (Exception e) {
+                    synchronized (threadErrorLock) {
+                        fatalThreadError = true;
+                        threadErrorMessage = "Error getting update: " + e.getMessage();
+                        connected = false;
+                    }
+                }
                 try {
                     // Sleep until timeout interval or until interrupted
                     while (!periodicUpdatesEnabled)
@@ -158,6 +224,16 @@ public class LocationHandler {
                     // Thread interrupted for an immediate update
                 }
             }
+            this.locationDataSource.logout();
+            ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (notificationSetLock) {
+                        for (GPSUpdate listener : notificationSet)
+                            listener.gpsDisconnected();
+                    }
+                }
+            });
         }
     }
 }

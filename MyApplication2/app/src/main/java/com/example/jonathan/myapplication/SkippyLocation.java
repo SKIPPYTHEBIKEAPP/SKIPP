@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
+import io.particle.android.sdk.cloud.ParticleCloudException;
 import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.cloud.ParticleDevice;
 
@@ -16,17 +17,30 @@ import io.particle.android.sdk.cloud.ParticleDevice;
 
 public class SkippyLocation implements LocationDataSource {
     ParticleDevice device = null;
+    ParticleCloud cloud = null;
 
     public void init(Context context) {
         ParticleCloudSDK.init(context);
     }
 
-    public void login(LoginInformation loginInformation) {
+    public void login(LoginInformation loginInformation) throws Exception {
+        this.cloud = ParticleCloudSDK.getCloud();
         try {
-            ParticleCloud cloud = ParticleCloudSDK.getCloud();
             cloud.logIn(loginInformation.username, loginInformation.password);
-            device = cloud.getDevices().get(0);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            throw new Exception("Unable to connect: " + e.getMessage());
+        }
+        try {
+            this.device = cloud.getDevices().get(0);
+            if (!this.device.isConnected())
+                throw new Exception("Device not connected");
+        } catch (Exception e) {
+            throw new Exception("Unable to access device: " + e.getMessage());
+        }
+    }
+
+    public void logout() {
+        this.cloud.logOut();
     }
 
     public GPSData getUpdate(){

@@ -17,6 +17,10 @@ public class DummyDataSource implements LocationDataSource {
 
     }
 
+    public void logout() {
+
+    }
+
     public GPSData getUpdate() {
         return new GPSData(47.6062, 122.3321, 'N', 'W', 100, new Date(), true);
     }

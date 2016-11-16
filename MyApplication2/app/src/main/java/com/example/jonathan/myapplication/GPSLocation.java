@@ -3,6 +3,7 @@ package com.example.jonathan.myapplication;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -59,8 +60,14 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
 
         // Now that map has appeared, get a valid location instead of waiting for the
         // interval timeout
-        handler.forceUpdate();
+        try {
+            handler.forceUpdate();
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
+
+    // GPSUpdate interface:
 
     public void receiveUpdate(GPSData data){
         if (this.mMap != null) {
@@ -77,6 +84,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
             mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
         }
+    }
+
+    public void gpsDisconnected(){
+        Toast.makeText(this, "GPS Location Service Failure", Toast.LENGTH_LONG).show();
     }
 
 }

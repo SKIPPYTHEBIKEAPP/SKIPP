@@ -53,5 +53,7 @@ public class Location extends AppCompatActivity implements GPSUpdate{
         gpsView.append(update);
     }
 
+    public void gpsDisconnected() {
 
+    }
 }
