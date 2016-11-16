@@ -6,15 +6,51 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static LocationHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        // Not sure what this code does?  It manipulated the UI though, so it has to be done
+        // on the UI thread, so added I "runOnUiThread" to this.
+        this.runOnUiThread(
+            new Thread(new Runnable() {
+                public void run() {
+
+                    setContentView(R.layout.activity_main);
+                }
+            }));
+
+        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation(login);
+
+        DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
+        LocationDataSource source = new DummyDataSource(dummyConfig);
+
+
+        handler = new LocationHandler(source, 30000, 15, this);
+        // handler.subscribeUpdates(this);
+        try {
+            handler.start();
+            Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
+            handler.setAutomaticUpdates(true);
+        } catch (Exception e) {
+            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+    }
+
+    public static LocationHandler getHandler(){
+        return handler;
     }
 
     /**
@@ -27,33 +63,15 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /**
-     * Called when the user clicks the click button
-     * public void DisplayLocation(View view) {
-     * Intent intent = new Intent(this, Location.class);
-     * <p>
-     * startActivity(intent);
-     * }
-     * <p>
-     * /** Called when the user clicks the Send button
-     */
-    public void DisplayLogin(View view) {
-        Intent intent = new Intent(this, LoginActivity.class);
-
-        startActivity(intent);
-    }
 
     /**
      * Called when the user clicks the Send button
      */
     public void DisplayLocation(View view) {
-
-        //will call the location
-        Location current = new Location();
         final Intent intent = new Intent(this, GPSLocation.class);
 
-        //if location is set to zero no new location has been reported
-        if (current.getLat() == 0 && current.getLong() == 0) {
+        //Test to see if there is a recent location update
+        if (this.handler.isDataStale()) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
@@ -89,12 +107,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void DisplayBattery(View view) {
-        Intent intent = new Intent(this, Location.class);
+        Intent intent = new Intent(this, Battery.class);
 
         startActivity(intent);
     }
-
-
 }

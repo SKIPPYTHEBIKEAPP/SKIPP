@@ -2,6 +2,8 @@ package com.example.jonathan.myapplication;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,11 +12,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DecimalFormat;
+import java.util.Date;
 
-public class GPSLocation extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
+public class GPSLocation extends FragmentActivity implements OnMapReadyCallback, GPSUpdate {
 
+    private volatile GoogleMap mMap;
+    private LocationHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +28,19 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        handler = MainActivity.getHandler();
+        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation();
+        //LocationDataSource source = new DummyDataSource();
+        //handler = new LocationHandler(source, 10000, login, this);
+        handler.subscribeUpdates(this);
+        //handler.start();
     }
 
 
@@ -39,17 +57,33 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        Location current = new Location();
-        double Latitude = current.getLat();
-        double Longitude = current.getLong();
 
-        // Add a marker in Sydney and move the camera
-        LatLng seattle = new LatLng(Latitude, Longitude);
-
-
-            mMap.addMarker(new MarkerOptions().position(seattle).title("Marker for my home"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(seattle, 15));
-
-
+        // Now that map has appeared, get a valid location instead of waiting for the
+        // interval timeout
+        receiveUpdate(handler.retrieveLastGPSData());
     }
+
+    // GPSUpdate interface:
+
+    public void receiveUpdate(GPSData data){
+        if ((this.mMap != null && data != null) && data.valid) {
+            double lat = data.lat;
+            double lon = data.lon;
+
+            if (data.latDir == 'S')
+                lat *= -1;
+            if (data.lonDir == 'W')
+                lon *= -1;
+
+            LatLng currentLocation = new LatLng(lat, lon);
+
+            mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        }
+    }
+
+    public void gpsDisconnected(){
+        Toast.makeText(this, "GPS Location Service Failure", Toast.LENGTH_LONG).show();
+    }
+
 }

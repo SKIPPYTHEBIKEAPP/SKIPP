@@ -1,35 +1,59 @@
+
 package com.example.jonathan.myapplication;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
-public class Location extends AppCompatActivity {
+import java.text.DecimalFormat;
+import java.util.Date;
+
+public class Location extends AppCompatActivity implements GPSUpdate{
+    private LocationHandler handler;
+    public double lon = 0;
+    public double lat = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_location);
+
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        handler = MainActivity.getHandler();
+        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation();
+        //LocationDataSource source = new DummyDataSource();
+        //handler = new LocationHandler(source, 10000, login, this);
+        handler.subscribeUpdates(this);
+        //handler.start();
     }
 
-    private double Longitude = 0;
-    private double Latitude =0;
+    public double getLon(){
+        return lon;
 
-    public double getLong() {
-
-        return Longitude;
     }
-
     public double getLat(){
-        return Latitude;
-
-
-    }
-    private void setLongitude(double Long){
-        this.Longitude = Long;
-
+        return lat;
     }
 
-    private void setLatitude(double Lat){
-        this.Latitude = Lat;
-}
+
+    @Override
+    public void receiveUpdate(GPSData data) {
+        TextView gpsView = (TextView)findViewById(R.id.GPSView);
+        String update = "";
+        if (data.valid) {
+            lat = data.lat;
+            lon = data.lon;
+            update = lat + " " + lon;
+        }
+
+        gpsView.append(update);
+    }
+
+    public void gpsDisconnected() {
+
+    }
 }
