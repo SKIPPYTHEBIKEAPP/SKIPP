@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
-import io.particle.android.sdk.cloud.ParticleCloudException;
 import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.cloud.ParticleDevice;
 
@@ -18,10 +17,10 @@ import io.particle.android.sdk.cloud.ParticleDevice;
 public class SkippyLocation implements LocationDataSource {
     ParticleDevice device = null;
     ParticleCloud cloud = null;
-    LoginInformation loginInformation = null;
+    SkippyLoginInformation skippyLoginInformation = null;
 
-    public SkippyLocation(LoginInformation loginInformation){
-        this.loginInformation = loginInformation;
+    public SkippyLocation(SkippyLoginInformation skippyLoginInformation){
+        this.skippyLoginInformation = skippyLoginInformation;
     }
 
     public void init(Context context) {
@@ -31,7 +30,7 @@ public class SkippyLocation implements LocationDataSource {
     public void login() throws Exception {
         this.cloud = ParticleCloudSDK.getCloud();
         try {
-            cloud.logIn(this.loginInformation.username, this.loginInformation.password);
+            cloud.logIn(this.skippyLoginInformation.username, this.skippyLoginInformation.password);
         } catch (Exception e) {
             throw new Exception("Unable to connect: " + e.getMessage());
         }

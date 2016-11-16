@@ -6,18 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
-
-
-import org.joda.time.DateTime;
-import org.joda.time.Instant;
-import org.joda.time.Interval;
-
-import java.text.DecimalFormat;
-import java.util.Date;
-
-import io.particle.android.sdk.cloud.*;
 
 public class MainActivity extends AppCompatActivity {
     private static LocationHandler handler;
@@ -36,10 +25,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }));
 
-        LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
-        LocationDataSource source = new SkippyLocation(login);
+        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
+        //LocationDataSource source = new SkippyLocation(login);
 
-        //LocationDataSource source = new DummyDataSource();
+        DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
+        LocationDataSource source = new DummyDataSource(dummyConfig);
 
 
         handler = new LocationHandler(source, 30000, 15, this);

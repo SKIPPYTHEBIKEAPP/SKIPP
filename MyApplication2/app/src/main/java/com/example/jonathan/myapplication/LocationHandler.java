@@ -157,7 +157,7 @@ public class LocationHandler {
     // Private helper class for thread to update GPS information.  Must be implemented as
     // a separate thread because the IO calls are blocking and cannot be done on the UI thread
     private class updateServiceThread implements Runnable {
-        private LoginInformation loginInformation;
+        private SkippyLoginInformation skippyLoginInformation;
         private Context context;
         private LocationDataSource locationDataSource;
         private long checkInterval;

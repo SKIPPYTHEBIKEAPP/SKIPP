@@ -9,6 +9,12 @@ import java.util.Date;
  */
 
 public class DummyDataSource implements LocationDataSource {
+    DummyDataSourceConfig dummyConfig;
+
+    public DummyDataSource(DummyDataSourceConfig dummyConfig){
+        this.dummyConfig = dummyConfig;
+    }
+
     public void init(Context context) {
 
     }

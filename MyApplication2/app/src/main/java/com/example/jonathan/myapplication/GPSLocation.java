@@ -35,7 +35,7 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     protected void onStart() {
         super.onStart();
         handler = MainActivity.getHandler();
-        //LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
+        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
         //LocationDataSource source = new SkippyLocation();
         //LocationDataSource source = new DummyDataSource();
         //handler = new LocationHandler(source, 10000, login, this);
