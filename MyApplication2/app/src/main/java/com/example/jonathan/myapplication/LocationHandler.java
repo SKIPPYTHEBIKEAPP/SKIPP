@@ -47,7 +47,6 @@ import java.util.Set;
 public class LocationHandler {
     private LocationDataSource locationDataSource;  // instance of LocationDataSource to be used
     private Long checkInterval;                     // how often (in ms) to check for location update
-    private LoginInformation loginInformation;      // remove this
     private Context context;                        // context for android app (used by Particle API
                                                     // as well as sending tasks to UI thread
     private Thread updateThread;                    // thread used for checking for location updates
@@ -65,11 +64,9 @@ public class LocationHandler {
                                                     // concurrency lock for thread errors
 
     public LocationHandler (LocationDataSource locationDataSource, long checkInterval,
-                            int minutesUntilStale,
-                            LoginInformation loginInformation, Context context) {
+                            int minutesUntilStale, Context context) {
         this.locationDataSource = locationDataSource;
         this.checkInterval = checkInterval;
-        this.loginInformation = loginInformation;
         this.context = context;
         this.notificationSet = new HashSet<GPSUpdate>();
         this.lastData = GPSData.invalidData();
@@ -101,7 +98,7 @@ public class LocationHandler {
 
     // Begin the automated GPS location thread
     public void start() throws Exception {
-        this.updateThread = new Thread(new updateServiceThread(loginInformation, context,
+        this.updateThread = new Thread(new updateServiceThread(context,
                 locationDataSource, checkInterval));
         this.updateThread.start();
         while (this.connected == false && this.fatalThreadError == false) {
@@ -165,9 +162,8 @@ public class LocationHandler {
         private LocationDataSource locationDataSource;
         private long checkInterval;
 
-        public updateServiceThread(LoginInformation loginInformation, Context context,
+        public updateServiceThread(Context context,
                                    LocationDataSource locationDataSource, long checkInterval) {
-            this.loginInformation = loginInformation;
             this.context = context;
             this.locationDataSource = locationDataSource;
             this.checkInterval = checkInterval;
@@ -186,7 +182,7 @@ public class LocationHandler {
                 }
             }
             try {
-                this.locationDataSource.login(this.loginInformation);
+                this.locationDataSource.login();
             } catch (Exception e) {
                 synchronized (threadErrorLock) {
                     fatalThreadError = true;

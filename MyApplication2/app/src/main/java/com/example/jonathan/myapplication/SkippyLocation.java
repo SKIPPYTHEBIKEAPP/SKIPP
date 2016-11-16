@@ -18,15 +18,20 @@ import io.particle.android.sdk.cloud.ParticleDevice;
 public class SkippyLocation implements LocationDataSource {
     ParticleDevice device = null;
     ParticleCloud cloud = null;
+    LoginInformation loginInformation = null;
+
+    public SkippyLocation(LoginInformation loginInformation){
+        this.loginInformation = loginInformation;
+    }
 
     public void init(Context context) {
         ParticleCloudSDK.init(context);
     }
 
-    public void login(LoginInformation loginInformation) throws Exception {
+    public void login() throws Exception {
         this.cloud = ParticleCloudSDK.getCloud();
         try {
-            cloud.logIn(loginInformation.username, loginInformation.password);
+            cloud.logIn(this.loginInformation.username, this.loginInformation.password);
         } catch (Exception e) {
             throw new Exception("Unable to connect: " + e.getMessage());
         }

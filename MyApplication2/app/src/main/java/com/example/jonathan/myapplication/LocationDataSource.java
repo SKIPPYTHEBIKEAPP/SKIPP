@@ -12,7 +12,7 @@ public interface LocationDataSource {
     public void init(Context context) throws Exception;
 
     // This method will be called before GPS updates are requested
-    public void login(LoginInformation loginInformation) throws Exception;
+    public void login() throws Exception;
 
     // This method will be called to log out of data source
     public void logout();

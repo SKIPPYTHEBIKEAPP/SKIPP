@@ -37,9 +37,12 @@ public class MainActivity extends AppCompatActivity {
             }));
 
         LoginInformation login = new LoginInformation("dwongyee@gmail.com", "123456");
-        //LocationDataSource source = new SkippyLocation();
-        LocationDataSource source = new DummyDataSource();
-        handler = new LocationHandler(source, 30000, 15, login, this);
+        LocationDataSource source = new SkippyLocation(login);
+
+        //LocationDataSource source = new DummyDataSource();
+
+
+        handler = new LocationHandler(source, 30000, 15, this);
         // handler.subscribeUpdates(this);
         try {
             handler.start();

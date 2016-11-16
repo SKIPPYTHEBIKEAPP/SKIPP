@@ -13,7 +13,7 @@ public class DummyDataSource implements LocationDataSource {
 
     }
 
-    public void login(LoginInformation loginInformation) {
+    public void login() {
 
     }
 
