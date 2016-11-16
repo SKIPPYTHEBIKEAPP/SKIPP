@@ -55,7 +55,7 @@ public class LocationHandler {
     private final Object notificationSetLock = new Object();
                                                     // concurrency lock for notificationSet
     private GPSData lastData = null;                // last GPS data relieved
-    private boolean periodicUpdatesEnabled;         // Flag for whether automatic updates are enabled
+    private volatile boolean periodicUpdatesEnabled;// Flag for whether automatic updates are enabled
     private int minutesUntilStale;                  // Number of minutes before data is considered stale;
     private volatile boolean connected;             // Flag to indicate if data source is connected
     private volatile boolean fatalThreadError;      // Flag to indicate data source is not working
@@ -214,8 +214,9 @@ public class LocationHandler {
                 }
                 try {
                     // Sleep until timeout interval or until interrupted
-                    while (!periodicUpdatesEnabled)
+                    do {
                         Thread.sleep(this.checkInterval);
+                    } while (!periodicUpdatesEnabled);  // Stay sleeping if periodic updates are disabled
                 } catch (Exception e) {
                     // Thread interrupted for an immediate update
                 }

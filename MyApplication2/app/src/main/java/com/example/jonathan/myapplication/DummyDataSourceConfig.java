@@ -5,4 +5,5 @@ package com.example.jonathan.myapplication;
  */
 
 public class DummyDataSourceConfig {
+    final public double movementspeed = .001;
 }

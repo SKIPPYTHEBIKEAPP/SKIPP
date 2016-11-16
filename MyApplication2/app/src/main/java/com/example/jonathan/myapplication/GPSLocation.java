@@ -18,7 +18,7 @@ import java.util.Date;
 
 public class GPSLocation extends FragmentActivity implements OnMapReadyCallback, GPSUpdate {
 
-    private GoogleMap mMap;
+    private volatile GoogleMap mMap;
     private LocationHandler handler;
 
     @Override
@@ -60,17 +60,13 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
 
         // Now that map has appeared, get a valid location instead of waiting for the
         // interval timeout
-        try {
-            handler.forceUpdate();
-        } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        receiveUpdate(handler.retrieveLastGPSData());
     }
 
     // GPSUpdate interface:
 
     public void receiveUpdate(GPSData data){
-        if (this.mMap != null) {
+        if ((this.mMap != null && data != null) && data.valid) {
             double lat = data.lat;
             double lon = data.lon;
 

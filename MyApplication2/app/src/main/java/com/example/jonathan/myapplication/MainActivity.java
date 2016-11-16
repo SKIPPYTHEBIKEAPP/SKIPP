@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             handler.start();
             Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
+            handler.setAutomaticUpdates(true);
         } catch (Exception e) {
             Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }

@@ -10,9 +10,17 @@ import java.util.Date;
 
 public class DummyDataSource implements LocationDataSource {
     DummyDataSourceConfig dummyConfig;
+    private double lat;
+    private char latDir;
+    private double lon;
+    private char lonDir;
 
     public DummyDataSource(DummyDataSourceConfig dummyConfig){
         this.dummyConfig = dummyConfig;
+        lat = 47.6062;
+        lon = 122.3321;
+        latDir = 'N';
+        lonDir = 'W';
     }
 
     public void init(Context context) {
@@ -28,6 +36,8 @@ public class DummyDataSource implements LocationDataSource {
     }
 
     public GPSData getUpdate() {
-        return new GPSData(47.6062, 122.3321, 'N', 'W', 100, new Date(), true);
+        lat += dummyConfig.movementspeed;
+        lon += dummyConfig.movementspeed;
+        return new GPSData(lat, lon, latDir, lonDir, 100, new Date(), true);
     }
 }
