@@ -3,6 +3,7 @@ package com.example.jonathan.myapplication;
 import android.content.Context;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Implementation of LocationDataSource that returns fake data
@@ -14,6 +15,7 @@ public class DummyDataSource implements LocationDataSource {
     private char latDir;
     private double lon;
     private char lonDir;
+    private Random random;
 
     public DummyDataSource(DummyDataSourceConfig dummyConfig){
         this.dummyConfig = dummyConfig;
@@ -21,23 +23,37 @@ public class DummyDataSource implements LocationDataSource {
         lon = 122.3321;
         latDir = 'N';
         lonDir = 'W';
+        random = new Random();
     }
 
     public void init(Context context) {
 
     }
 
-    public void login() {
-
+    public void login() throws Exception {
+        if (dummyConfig.invalidLogin)
+            throw new Exception ("Simulated invalid credential error");
     }
 
     public void logout() {
 
     }
 
-    public GPSData getUpdate() {
-        lat += dummyConfig.movementspeed;
-        lon += dummyConfig.movementspeed;
-        return new GPSData(lat, lon, latDir, lonDir, 100, new Date(), true);
+    public GPSData getUpdate() throws Exception {
+        if (random.nextFloat() < dummyConfig.connectFailProbability)
+            throw new Exception("Simulated connection failure.");
+
+        // Randomly move west/east or north/south
+        int latMovementDirection = random.nextBoolean() ? 1 : -1;
+        int lonMovementDirection = random.nextBoolean() ? 1 : -1;
+
+        // Change current location
+        lat += random.nextFloat() * dummyConfig.movementSpeed * latMovementDirection;
+        lon += random.nextFloat() * dummyConfig.movementSpeed * lonMovementDirection;
+
+        if (random.nextFloat() < dummyConfig.invalidDataProbability)
+            return GPSData.invalidData();
+        else
+            return new GPSData(lat, lon, latDir, lonDir, 100, new Date(), true);
     }
 }
