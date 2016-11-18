@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    private static LocationHandler handler;
+    private static LocationHandler handler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,15 +31,16 @@ public class MainActivity extends AppCompatActivity {
         DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
         LocationDataSource source = new DummyDataSource(dummyConfig);
 
-
-        handler = new LocationHandler(source, 30000, 15, this);
-        // handler.subscribeUpdates(this);
-        try {
-            handler.start();
-            Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
-            handler.setAutomaticUpdates(true);
-        } catch (Exception e) {
-            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        if (handler == null) {
+            handler = new LocationHandler(source, 10000, 15, this);
+            // handler.subscribeUpdates(this);
+            try {
+                handler.start();
+                Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
+                handler.setAutomaticUpdates(true);
+            } catch (Exception e) {
+                Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
     }
 
