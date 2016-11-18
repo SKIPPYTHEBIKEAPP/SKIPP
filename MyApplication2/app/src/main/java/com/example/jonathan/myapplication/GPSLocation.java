@@ -19,7 +19,6 @@ import java.util.Date;
 public class GPSLocation extends FragmentActivity implements OnMapReadyCallback, GPSUpdate {
 
     private volatile GoogleMap mMap;
-    private LocationHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +33,8 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onStart() {
         super.onStart();
-        handler = MainActivity.getHandler();
-        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
-        //LocationDataSource source = new SkippyLocation();
-        //LocationDataSource source = new DummyDataSource();
-        //handler = new LocationHandler(source, 10000, login, this);
-        handler.subscribeUpdates(this);
-        //handler.start();
+        if (Configuration.getLocationHandler() != null)
+            Configuration.getLocationHandler().subscribeUpdates(this);
     }
 
 
@@ -60,7 +54,8 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
 
         // Now that map has appeared, get a valid location instead of waiting for the
         // interval timeout
-        receiveUpdate(handler.retrieveLastGPSData());
+        if (Configuration.getLocationHandler() != null)
+            receiveUpdate(Configuration.getLocationHandler().retrieveLastGPSData());
     }
 
     // GPSUpdate interface:

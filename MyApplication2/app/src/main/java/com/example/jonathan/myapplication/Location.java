@@ -11,7 +11,6 @@ import java.text.DecimalFormat;
 import java.util.Date;
 
 public class Location extends AppCompatActivity implements GPSUpdate{
-    private LocationHandler handler;
     public double lon = 0;
     public double lat = 0;
 
@@ -22,13 +21,12 @@ public class Location extends AppCompatActivity implements GPSUpdate{
     @Override
     protected void onStart() {
         super.onStart();
-        handler = MainActivity.getHandler();
         //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
         //LocationDataSource source = new SkippyLocation();
         //LocationDataSource source = new DummyDataSource();
         //handler = new LocationHandler(source, 10000, login, this);
-        handler.subscribeUpdates(this);
-        //handler.start();
+        if (Configuration.getLocationHandler() != null)
+            Configuration.getLocationHandler().subscribeUpdates(this);
     }
 
     public double getLon(){

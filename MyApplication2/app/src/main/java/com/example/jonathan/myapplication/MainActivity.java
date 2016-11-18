@@ -9,49 +9,16 @@ import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    private static LocationHandler handler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Not sure what this code does?  It manipulated the UI though, so it has to be done
-        // on the UI thread, so added I "runOnUiThread" to this.
-        this.runOnUiThread(
-            new Thread(new Runnable() {
-                public void run() {
-
-                    setContentView(R.layout.activity_main);
-                }
-            }));
-
-        //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
-        //LocationDataSource source = new SkippyLocation(login);
-
-        DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
-        LocationDataSource source = new DummyDataSource(dummyConfig);
-
-        if (handler == null) {
-            handler = new LocationHandler(source, 10000, 15, this);
-            // handler.subscribeUpdates(this);
-            try {
-                handler.start();
-                Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
-                handler.setAutomaticUpdates(true);
-            } catch (Exception e) {
-                Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }
+        setContentView(R.layout.activity_main);
     }
 
     @Override
     protected void onStart() {
-
         super.onStart();
-    }
-
-    public static LocationHandler getHandler(){
-        return handler;
     }
 
     /**
@@ -72,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = new Intent(this, GPSLocation.class);
 
         //Test to see if there is a recent location update
-        if (this.handler.isDataStale()) {
+        if (Configuration.getLocationHandler() != null &&
+                Configuration.getLocationHandler().isDataStale()) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
