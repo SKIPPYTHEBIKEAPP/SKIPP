@@ -33,11 +33,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onStart() {
         super.onStart();
-        if (Configuration.getLocationHandler() != null)
+        if (Configuration.getLocationHandler() != null) {
             Configuration.getLocationHandler().subscribeUpdates(this);
+        }
     }
-
-
 
     /**
      * Manipulates the map once available.

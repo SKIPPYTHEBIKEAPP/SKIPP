@@ -19,15 +19,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (Configuration.getLocationHandler() == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
     }
 
     /**
      * Called when the user clicks the Send button
      */
     public void DisplaySetting(View view) {
-        Intent intent = new Intent(this, Settings.class);
-
-
+        Configuration.setLocationHandler(null);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 

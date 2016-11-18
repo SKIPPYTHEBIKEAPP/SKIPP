@@ -3,6 +3,7 @@ package com.example.jonathan.myapplication;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -123,11 +124,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //SkippyLoginInformation login = new SkippyLoginInformation("dwongyee@gmail.com", "123456");
             //LocationDataSource source = new SkippyLocation(login);
 
-            SkippyLoginInformation login = new SkippyLoginInformation(email, password);
-            LocationDataSource source = new SkippyLocation(login);
-
-            //DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
-            //LocationDataSource source = new DummyDataSource(dummyConfig);
+            LocationDataSource source = null;
+            if (email.equalsIgnoreCase("dummy")){
+                DummyDataSourceConfig dummyConfig = new DummyDataSourceConfig();
+                source = new DummyDataSource(dummyConfig);
+            } else {
+                SkippyLoginInformation login = new SkippyLoginInformation(email, password);
+                source = new SkippyLocation(login);
+            }
 
             Configuration.setLocationHandlerIfNull(new LocationHandler(source,
                     Configuration.defaultAutomaticRefresh, 15, this));
@@ -142,6 +146,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             showProgress(false);
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
         }
     }
 
