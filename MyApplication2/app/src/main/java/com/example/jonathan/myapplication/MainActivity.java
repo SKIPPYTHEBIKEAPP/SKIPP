@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             startService(this.lockService);
         } else {
             stopService(this.lockService);
+            this.lockService = null;
         }
 
     }
