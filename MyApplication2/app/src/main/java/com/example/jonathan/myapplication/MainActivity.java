@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private Intent lockService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +96,13 @@ public class MainActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void ActivateLock(View view) {
-        Intent serviceIntent = new Intent(this, LockService.class);
-        startService(serviceIntent);
+        if (this.lockService == null || (Configuration.getLockService() != null &&
+                !Configuration.getLockService().getRunning())) {
+            this.lockService = new Intent(this, LockService.class);
+            startService(this.lockService);
+        } else {
+            stopService(this.lockService);
+        }
+
     }
 }

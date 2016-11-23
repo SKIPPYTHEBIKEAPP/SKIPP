@@ -8,6 +8,7 @@ public class Configuration {
     private static Object ConfigurationLock = new Object();
     private static LocationHandler locationHandler = null;
     public static final long defaultAutomaticRefresh = 10000;      // in ms
+    private static LockService lockService = null;
 
     public static LocationHandler getLocationHandler(){
         return Configuration.locationHandler;
@@ -22,5 +23,13 @@ public class Configuration {
             if (Configuration.locationHandler == null)
                 Configuration.locationHandler = locationHandler;
         }
+    }
+
+    public static LockService getLockService(){
+        return Configuration.lockService;
+    }
+
+    public static void setLockService(LockService lockService){
+        Configuration.lockService = lockService;
     }
 }
