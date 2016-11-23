@@ -87,4 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+    /**
+     * Called when the user clicks the Send button
+     */
+    public void ActivateLock(View view) {
+        Intent serviceIntent = new Intent(this, LockService.class);
+        startService(serviceIntent);
+    }
 }

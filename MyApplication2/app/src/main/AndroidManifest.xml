@@ -48,6 +48,11 @@
         <activity
             android:name=".GPSLocation"
             android:label="@string/title_activity_gpslocation" />
+
+        <service
+            android:name=".LockService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

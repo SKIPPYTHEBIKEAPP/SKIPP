@@ -28,6 +28,35 @@
 
 
 
+
+    <TextView
+        android:layout_width="99dp"
+        android:layout_height="wrap_content"
+        android:text="Location"
+        android:textColor="@color/white"
+        android:ems="10"
+        android:id="@+id/textView2"
+        android:layout_marginTop="230dp"
+        android:layout_marginLeft="-95dp"
+        android:textSize="24sp" />
+
+    <ImageButton
+        android:src="@drawable/lockbutton"
+        android:onClick="ActivateLock"
+        android:id="@+id/imageButton2"
+        android:layout_width="100dp"
+        android:scaleType="centerCrop"
+        android:cropToPadding="false"
+        android:adjustViewBounds="false"
+        android:visibility="visible"
+        android:layout_height="100dp"
+        android:layout_marginTop="360dp"
+
+        android:background="@null"
+        android:layout_marginLeft="-90dp" />
+
+
+
     <TextView
         android:layout_width="99dp"
         android:layout_height="wrap_content"
@@ -35,10 +64,9 @@
         android:textColor="@color/white"
         android:ems="10"
         android:id="@+id/textView"
-        android:layout_marginTop="230dp"
-        android:layout_marginLeft="-95dp"
+        android:layout_marginTop="480dp"
+        android:layout_marginLeft="-100dp"
         android:textSize="24sp" />
-
 
 
 
@@ -72,7 +100,7 @@
         />
 
     <ImageButton
-        android:src="@drawable/setting"
+        android:src="@drawable/power"
         android:onClick="DisplaySetting"
 
         android:layout_width="100dp"
@@ -88,7 +116,7 @@
     <TextView
         android:layout_width="99dp"
         android:layout_height="wrap_content"
-        android:text="Settings"
+        android:text="Logout"
         android:textColor="@color/white"
         android:ems="10"
         android:id="@+id/textView4"
