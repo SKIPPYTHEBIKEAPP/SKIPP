@@ -121,13 +121,6 @@ public class LocationHandler {
         this.connected = false;
         if (updateThread != null && updateThread.isAlive())
             updateThread.interrupt();
-        while (updateThread.isAlive()){
-            try {
-                Thread.sleep(300);
-                Log.d("GPS Connect", "Waiting for disconnection");
-            } catch (Exception e) {// sleep interrupted}
-            }
-        }
     }
 
     public void setAutomaticUpdates(boolean periodicUpdates) {

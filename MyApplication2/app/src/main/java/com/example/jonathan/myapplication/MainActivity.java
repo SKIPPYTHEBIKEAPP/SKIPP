@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void DisplaySetting(View view) {
+        if (Configuration.getLocationHandler() != null){
+            Configuration.getLocationHandler().logout();
+        }
         Configuration.setLocationHandler(null);
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);

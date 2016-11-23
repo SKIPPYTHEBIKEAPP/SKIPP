@@ -38,6 +38,7 @@ public class LockService extends Service implements GPSUpdate {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
-        Configuration.getLocationHandler().setAutomaticUpdates(false);
+        if (Configuration.getLocationHandler() != null)
+            Configuration.getLocationHandler().setAutomaticUpdates(false);
     }
 }
