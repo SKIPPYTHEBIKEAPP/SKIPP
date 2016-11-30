@@ -34,6 +34,22 @@ public class LockService extends Service implements GPSUpdate {
 
     public void receiveUpdate(GPSData data){
         Toast.makeText(this, "GPS Update Received", Toast.LENGTH_LONG).show();
+        
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
+
+        //sounds alarm if location moves
+        //data +/- 0.0003 is based off of mapping a reasonable move distance
+        //currently crashes app.
+        if (((data.lat + 0.0003) > this.initialGPSLocation.lat || (data.lon + 0.0003) > this.initialGPSLocation.lon)
+                || ((data.lat - 0.0003) < this.initialGPSLocation.lat || (data.lon - 0.0003) < this.initialGPSLocation.lon)){
+
+
+
+            //Call back to MainActivity for alarm popup
+            if (Configuration.getMainActivity() != null)
+                Configuration.getMainActivity().AlarmTrigger();
+
+        }
     }
 
     public void gpsDisconnected(){
@@ -45,9 +61,10 @@ public class LockService extends Service implements GPSUpdate {
     public void onDestroy() {
         super.onDestroy();
         this.isRunning = false;
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
         if (Configuration.getLocationHandler() != null)
             Configuration.getLocationHandler().setAutomaticUpdates(false);
         Configuration.setLockService(null);
     }
+    
 }
