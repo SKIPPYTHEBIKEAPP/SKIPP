@@ -98,7 +98,7 @@ public class LocationHandler {
 
     public void unsubscribeUpdates(GPSUpdate removeListener){
         synchronized (this.notificationSetLock){
-            this.notificationSet.remove(this);
+            this.notificationSet.remove(removeListener);
         }
     }
 
