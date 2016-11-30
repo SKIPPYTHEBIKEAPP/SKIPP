@@ -9,6 +9,7 @@ public class Configuration {
     private static LocationHandler locationHandler = null;
     public static final long defaultAutomaticRefresh = 10000;      // in ms
     private static LockService lockService = null;
+    private static MainActivity mainActivity = null;
 
     public static LocationHandler getLocationHandler(){
         return Configuration.locationHandler;
@@ -31,5 +32,11 @@ public class Configuration {
 
     public static void setLockService(LockService lockService){
         Configuration.lockService = lockService;
+    }
+
+    public static MainActivity getMainActivity() { return Configuration.mainActivity; }
+
+    public static void setMainActivity(MainActivity mainActivity){
+        Configuration.mainActivity = mainActivity;
     }
 }
