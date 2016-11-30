@@ -2,6 +2,7 @@ package com.example.jonathan.myapplication;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -48,7 +49,6 @@ public class LockService extends Service implements GPSUpdate {
             //Call back to MainActivity for alarm popup
             if (Configuration.getMainActivity() != null)
                 Configuration.getMainActivity().AlarmTrigger();
-
         }
     }
 
@@ -65,6 +65,7 @@ public class LockService extends Service implements GPSUpdate {
         if (Configuration.getLocationHandler() != null)
             Configuration.getLocationHandler().setAutomaticUpdates(false);
         Configuration.setLockService(null);
+        Configuration.getLocationHandler().unsubscribeUpdates(this);
     }
     
 }

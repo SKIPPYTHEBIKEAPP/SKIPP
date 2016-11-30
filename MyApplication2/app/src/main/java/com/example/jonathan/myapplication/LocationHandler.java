@@ -96,6 +96,12 @@ public class LocationHandler {
         }
     }
 
+    public void unsubscribeUpdates(GPSUpdate removeListener){
+        synchronized (this.notificationSetLock){
+            this.notificationSet.remove(this);
+        }
+    }
+
     // Begin the automated GPS location thread
     public void start() throws Exception {
         this.updateThread = new Thread(new updateServiceThread(context,

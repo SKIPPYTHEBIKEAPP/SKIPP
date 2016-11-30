@@ -2,6 +2,7 @@ package com.example.jonathan.myapplication;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Configuration.setMainActivity(this);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void ActivateLock(View view) {
-        if (this.lockService == null || (Configuration.getLockService() != null &&
+        if (Configuration.getLockService() == null || (Configuration.getLockService() != null &&
                 !Configuration.getLockService().getRunning())) {
             this.lockService = new Intent(this, LockService.class);
             startService(this.lockService);
@@ -169,8 +171,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         alertDialog.show();
-        stopService(this.lockService);
-        this.lockService = null;
-
+        stopService(lockService);
     }
 }
