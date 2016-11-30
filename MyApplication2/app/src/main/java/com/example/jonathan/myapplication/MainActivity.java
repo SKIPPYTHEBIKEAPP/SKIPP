@@ -100,10 +100,77 @@ public class MainActivity extends AppCompatActivity {
                 !Configuration.getLockService().getRunning())) {
             this.lockService = new Intent(this, LockService.class);
             startService(this.lockService);
+
+            // arming popup
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("Device Armed");
+            alertDialog.setMessage("Location will be updated every 10 minutes. " +
+                    "You can still manually update at any time by tapping the Location button. " +
+                    "Changes in location will trigger an alarm on your device.  " +
+                    "To exit armed mode, tap the lock again.");
+
+
+            alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //maybe something is supposed to be here?
+                            //copy pasta
+                        }
+                    });
+            alertDialog.show();
+
         } else {
             stopService(this.lockService);
             this.lockService = null;
+
+            //disable popup
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("Device Disarmed");
+            alertDialog.setMessage("By clicking this, you are disabling the alarm feature.");
+
+
+            alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //maybe something is supposed to be here?
+                            //copy pasta
+
+                        }
+                    });
+            alertDialog.show();
         }
+
+    }
+
+    /**
+     * Called when gps moves in armed mode
+     */
+    public void AlarmTrigger() {
+
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle("Alarm Triggered!!!");
+        alertDialog.setMessage("The location of your device has changed. " +
+                "Press okay OK to halt alarm sound temporarily. " +
+                "To prevent further alarms, disable the Armed feature and precede to manually locate your device.");
+
+
+        mp.start();
+
+        //"OK" stops sound, at least it should...
+        alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (mp.isPlaying()) {
+                            mp.stop();
+                            mp.release();
+                        }
+                    }
+                });
+        alertDialog.show();
+        stopService(this.lockService);
+        this.lockService = null;
 
     }
 }
