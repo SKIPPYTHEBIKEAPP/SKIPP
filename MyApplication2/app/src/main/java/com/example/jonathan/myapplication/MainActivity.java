@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,9 +33,10 @@ public class MainActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void DisplaySetting(View view) {
-        if (Configuration.getLocationHandler() != null){
+        if (Configuration.getLockService() != null)
+            Configuration.getLockService().onDestroy();
+        if (Configuration.getLocationHandler() != null)
             Configuration.getLocationHandler().logout();
-        }
         Configuration.setLocationHandler(null);
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
@@ -98,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void ActivateLock(View view) {
+        final long msToMinutes = 1000 * 60;
+
         if (Configuration.getLockService() == null || (Configuration.getLockService() != null &&
                 !Configuration.getLockService().getRunning())) {
             this.lockService = new Intent(this, LockService.class);
@@ -106,7 +110,9 @@ public class MainActivity extends AppCompatActivity {
             // arming popup
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Device Armed");
-            alertDialog.setMessage("Location will be updated every 10 minutes. " +
+            alertDialog.setMessage("Location will be updated every " +
+                    Long.toString(Configuration.getLocationHandler().getCheckInterval() /
+                            msToMinutes) + " minutes. " +
                     "You can still manually update at any time by tapping the Location button. " +
                     "Changes in location will trigger an alarm on your device.  " +
                     "To exit armed mode, tap the lock again.");
@@ -125,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             stopService(this.lockService);
             this.lockService = null;
 
-            //disable popup
+            //disable popupdumm
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Device Disarmed");
             alertDialog.setMessage("By clicking this, you are disabling the alarm feature.");
@@ -141,36 +147,11 @@ public class MainActivity extends AppCompatActivity {
                     });
             alertDialog.show();
         }
-
     }
 
-    /**
-     * Called when gps moves in armed mode
-     */
-    public void AlarmTrigger() {
-
-        final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
-
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle("Alarm Triggered!!!");
-        alertDialog.setMessage("The location of your device has changed. " +
-                "Press okay OK to halt alarm sound temporarily. " +
-                "To prevent further alarms, disable the Armed feature and precede to manually locate your device.");
-
-
-        mp.start();
-
-        //"OK" stops sound, at least it should...
-        alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (mp.isPlaying()) {
-                            mp.stop();
-                            mp.release();
-                        }
-                    }
-                });
-        alertDialog.show();
+    public void alarmTrigger() {
         stopService(lockService);
+        Intent intent = new Intent(this, AlarmActive.class);
+        startActivity(intent);
     }
 }

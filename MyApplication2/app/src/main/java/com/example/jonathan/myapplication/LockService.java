@@ -48,7 +48,7 @@ public class LockService extends Service implements GPSUpdate {
 
             //Call back to MainActivity for alarm popup
             if (Configuration.getMainActivity() != null)
-                Configuration.getMainActivity().AlarmTrigger();
+                Configuration.getMainActivity().alarmTrigger();
         }
     }
 

@@ -25,4 +25,5 @@
     </string>
     <string name="title_activity_gpslocation">Map</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_alarm_active">AlarmActive</string>
 </resources>

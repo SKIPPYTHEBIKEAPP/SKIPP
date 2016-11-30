@@ -139,7 +139,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             try {
                 Configuration.getLocationHandler().start();
                 Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
-                Configuration.getLocationHandler().setAutomaticUpdates(true);
             } catch (Exception e) {
                 Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 Configuration.setLocationHandler(null);

@@ -81,6 +81,9 @@ public class LocationHandler {
         this.checkInterval = checkInterval;
     }
 
+    // Getts the automatic GPS location update interval (in ms)
+    public long getCheckInterval() { return this.checkInterval; }
+
     // Cause an immediate GPS location update
     public void forceUpdate() throws Exception {
         if (this.connected && this.updateThread.isAlive())

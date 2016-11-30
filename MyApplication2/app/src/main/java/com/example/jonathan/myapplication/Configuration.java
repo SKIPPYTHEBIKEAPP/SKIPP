@@ -7,7 +7,7 @@ package com.example.jonathan.myapplication;
 public class Configuration {
     private static Object ConfigurationLock = new Object();
     private static LocationHandler locationHandler = null;
-    public static final long defaultAutomaticRefresh = 10000;      // in ms
+    public static final long defaultAutomaticRefresh = 20000;      // in ms
     private static LockService lockService = null;
     private static MainActivity mainActivity = null;
 
