@@ -17,11 +17,6 @@ public class Settings extends AppCompatActivity {
     }
 
     /**
-     * Called when the user clicks the click button
-     * public void DisplayLocation(View view) {
-     * Intent intent = new Intent(this, Location.class);
-     * <p>
-     * startActivity(intent);
      * }
      * <p>
      * /** Called when the user clicks the Send button

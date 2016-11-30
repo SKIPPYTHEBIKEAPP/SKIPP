@@ -1,7 +1,10 @@
 package com.example.jonathan.myapplication;
 
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,19 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        final Button refreashButton = (Button) findViewById(R.id.refreshbutton);
+        refreashButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (Configuration.getLocationHandler() != null) {
+                    try {
+                        Configuration.getLocationHandler().forceUpdate();
+                    } catch (Exception e) {
+                        // might want to display an error if it can't refresh?
+                    }
+                }
+            }
+        });
     }
 
 
@@ -61,6 +77,7 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
 
     public void receiveUpdate(GPSData data){
         if ((this.mMap != null && data != null) && data.valid) {
+            mMap.clear();
             double lat = data.lat;
             double lon = data.lon;
 
@@ -72,12 +89,13 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
             LatLng currentLocation = new LatLng(lat, lon);
 
             mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
+                    mMap.getCameraPosition().zoom));
         }
     }
 
     public void gpsDisconnected(){
-        Toast.makeText(this, "GPS Location Service Failure", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "GPS Location Service Failure", Toast.LENGTH_LONG).show();
     }
 
 }
