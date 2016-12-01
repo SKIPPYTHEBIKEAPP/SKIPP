@@ -40,7 +40,7 @@ public class DummyDataSource implements LocationDataSource {
     }
 
     public GPSData getUpdate() throws Exception {
-        if (random.nextFloat() < dummyConfig.connectFailProbability)
+        if (random.nextDouble() < dummyConfig.connectFailProbability)
             throw new Exception("Simulated connection failure.");
 
         // Randomly move west/east or north/south

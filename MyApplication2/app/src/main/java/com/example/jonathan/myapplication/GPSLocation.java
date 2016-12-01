@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -78,13 +77,8 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     public void receiveUpdate(GPSData data){
         if ((this.mMap != null && data != null) && data.valid) {
             mMap.clear();
-            double lat = data.lat;
-            double lon = data.lon;
-
-            if (data.latDir == 'S')
-                lat *= -1;
-            if (data.lonDir == 'W')
-                lon *= -1;
+            double lat = GPSData.convertLatLon(data.lat, data.latDir);
+            double lon = GPSData.convertLatLon(data.lon, data.lonDir);
 
             LatLng currentLocation = new LatLng(lat, lon);
 

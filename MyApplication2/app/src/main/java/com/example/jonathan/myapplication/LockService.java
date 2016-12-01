@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 public class LockService extends Service implements GPSUpdate {
@@ -22,7 +23,7 @@ public class LockService extends Service implements GPSUpdate {
             Configuration.getLocationHandler().subscribeUpdates(this);
             Configuration.getLocationHandler().setAutomaticUpdates(true);
             this.initialGPSLocation = Configuration.getLocationHandler().retrieveLastGPSData();
-            Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Alarm Set", Toast.LENGTH_LONG).show();
             this.isRunning = true;
             Configuration.setLockService(this);
         }
@@ -34,18 +35,16 @@ public class LockService extends Service implements GPSUpdate {
     }
 
     public void receiveUpdate(GPSData data){
-        Toast.makeText(this, "GPS Update Received", Toast.LENGTH_LONG).show();
-        
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
 
+        // Just in case the initial data was not available when lock was set
+        if (initialGPSLocation == null || initialGPSLocation.valid == false)
+            initialGPSLocation = data;
+
+        double movedDistance = data.distanceTo(initialGPSLocation);
+        Log.d("Alarm Service", "Meters moved since alarm was set: " + Double.toString(movedDistance));
         //sounds alarm if location moves
-        //data +/- 0.0003 is based off of mapping a reasonable move distance
-        //currently crashes app.
-        if (((data.lat + 0.0003) > this.initialGPSLocation.lat || (data.lon + 0.0003) > this.initialGPSLocation.lon)
-                || ((data.lat - 0.0003) < this.initialGPSLocation.lat || (data.lon - 0.0003) < this.initialGPSLocation.lon)){
-
-
-
+        if (movedDistance > Configuration.acceptableMovement) {
             //Call back to MainActivity for alarm popup
             if (Configuration.getMainActivity() != null)
                 Configuration.getMainActivity().alarmTrigger();
@@ -53,7 +52,7 @@ public class LockService extends Service implements GPSUpdate {
     }
 
     public void gpsDisconnected(){
-        Toast.makeText(this, "GPS Disconnected", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "GPS Disconnected", Toast.LENGTH_LONG).show();
         onDestroy();
     }
 
@@ -61,11 +60,12 @@ public class LockService extends Service implements GPSUpdate {
     public void onDestroy() {
         super.onDestroy();
         this.isRunning = false;
-        Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
-        if (Configuration.getLocationHandler() != null)
+        Toast.makeText(this, "Alarm Deactivated", Toast.LENGTH_LONG).show();
+        if (Configuration.getLocationHandler() != null) {
             Configuration.getLocationHandler().setAutomaticUpdates(false);
+            Configuration.getLocationHandler().unsubscribeUpdates(this);
+        }
         Configuration.setLockService(null);
-        Configuration.getLocationHandler().unsubscribeUpdates(this);
     }
     
 }

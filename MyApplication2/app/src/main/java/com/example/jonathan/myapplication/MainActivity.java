@@ -10,7 +10,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MainActivity extends AppCompatActivity implements GPSUpdate {
     private Intent lockService = null;
 
     @Override
@@ -26,6 +30,13 @@ public class MainActivity extends AppCompatActivity {
         if (Configuration.getLocationHandler() == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
+        } else {
+            if (Configuration.getLocationHandler().isConnected()) {
+                // subscribe to notifications so disconnections can be appropriated dealt with
+                Configuration.getLocationHandler().subscribeUpdates(this);
+            } else {
+                gpsDisconnected();
+            }
         }
     }
 
@@ -152,6 +163,24 @@ public class MainActivity extends AppCompatActivity {
     public void alarmTrigger() {
         stopService(lockService);
         Intent intent = new Intent(this, AlarmActive.class);
+        startActivity(intent);
+    }
+
+    public void receiveUpdate(GPSData data){
+        // do nothing, MainActivity doesn't care about location updates
+    }
+
+    public void gpsDisconnected(){
+        // Service has been disconnected.  Clear out configuration dealing with connection and
+        // prompt user to reconnect.
+
+        Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.", Toast.LENGTH_LONG).show();
+
+        Configuration.setLocationHandler(null);
+        if (Configuration.getLockService() != null)
+            Configuration.getLockService().onDestroy();
+        // Restart activity to prompt re-login
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 }

@@ -95,6 +95,7 @@ public class LocationHandler {
     // Subscribe an object to be notified of GPS updates
     public void subscribeUpdates(GPSUpdate newListener){
         synchronized (this.notificationSetLock){
+            Log.d("GPS", "Adding " + newListener.toString() + " to GPS event listener pool.");
             this.notificationSet.add(newListener);
         }
     }
@@ -102,6 +103,7 @@ public class LocationHandler {
     public void unsubscribeUpdates(GPSUpdate removeListener){
         synchronized (this.notificationSetLock){
             this.notificationSet.remove(removeListener);
+            Log.d("GPS", "Removing " + removeListener.toString() + " from GPS event listener pool.");
         }
     }
 
@@ -137,7 +139,7 @@ public class LocationHandler {
     }
 
     public boolean isConnected(){
-        return this.connected;
+        return this.connected && updateThread.isAlive();
     }
 
     public boolean isDataStale(){
@@ -194,19 +196,36 @@ public class LocationHandler {
             connected = true;
             while (connected) {
                 try {
-                    final GPSData data = this.locationDataSource.getUpdate();
-                    if (data.valid)     // Save result for future retrieval if data is valid
-                        lastData = data;
-                    // Notify all listeners of this new data if valid
-                    ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (notificationSetLock) {
-                                for (GPSUpdate listener : notificationSet)
-                                    listener.receiveUpdate(data);
+                    GPSData data;
+                    do {
+                        data = this.locationDataSource.getUpdate();
+                        if (!data.valid)
+                            try {
+                                // Data is invalid, wait a certain amount of time and try again
+                                Log.d("GPS", "Invalid data recieved.  Waiting for retry.");
+                                Thread.sleep(Configuration.invalidDataRecheckInterval);
+                                Log.d("GPS", "Re-trying to get valid GPS data.");
+                            } catch (Exception e) {
+                                // sleep interrupted
                             }
-                        }
-                    });
+                    } while (!data.valid && connected == true);
+                    Log.d("GPS", "Valid GPS data receieved: " + data.toString());
+                    if (data.valid) {     // Save result for future retrieval if data is valid
+                        Log.d("GPS", "Distance moved since last data in meters: "  +
+                                data.distanceTo(lastData));
+                        final GPSData finaledData = data;
+                        lastData = data;
+                        // Notify all listeners of this new data if valid
+                        ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (notificationSetLock) {
+                                    for (GPSUpdate listener : notificationSet)
+                                        listener.receiveUpdate(finaledData);
+                                }
+                            }
+                        });
+                    }
                 } catch (Exception e) {
                     synchronized (threadErrorLock) {
                         fatalThreadError = true;
@@ -214,22 +233,29 @@ public class LocationHandler {
                         connected = false;
                     }
                 }
-                try {
-                    // Sleep until timeout interval or until interrupted
-                    do {
-                        Thread.sleep(this.checkInterval);
-                    } while (!periodicUpdatesEnabled);  // Stay sleeping if periodic updates are disabled
-                } catch (Exception e) {
-                    // Thread interrupted for an immediate update
-                }
+                if (connected == true)
+                    try {
+                        // Sleep until timeout interval or until interrupted
+                        do {
+                            Thread.sleep(this.checkInterval);
+                        } while (!periodicUpdatesEnabled);  // Stay sleeping if periodic updates are disabled
+                    } catch (Exception e) {
+                        // Thread interrupted for an immediate update
+                    }
             }
+            Log.d("GPS", "Connection to GPS service lost.");
+
+            // Connection has died, clean up this handler instance and notify subscribers
+            Configuration.setLocationHandler(null);
             this.locationDataSource.logout();
             ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     synchronized (notificationSetLock) {
-                        for (GPSUpdate listener : notificationSet)
+                        for (GPSUpdate listener : notificationSet) {
                             listener.gpsDisconnected();
+                        }
+                        notificationSet.clear();
                     }
                 }
             });
