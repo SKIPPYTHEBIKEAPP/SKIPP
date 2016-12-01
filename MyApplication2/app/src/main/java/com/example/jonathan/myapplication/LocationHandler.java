@@ -122,7 +122,7 @@ public class LocationHandler {
         }
         if (this.fatalThreadError == true)
             synchronized (this.threadErrorLock) {
-                throw new Exception("Unable to connect: " + this.threadErrorMessage);
+                throw new Exception(this.threadErrorMessage);
             }
         if (this.connected == false)
             throw new Exception ("No error, but not connected.  This shouldn't happen.");
@@ -187,13 +187,14 @@ public class LocationHandler {
             }
             try {
                 this.locationDataSource.login();
+                connected = true;
             } catch (Exception e) {
                 synchronized (threadErrorLock) {
                     fatalThreadError = true;
                     threadErrorMessage = "Unable to login: " + e.getMessage();
+                    Log.d("GPS", "Unable to login: " + e.getMessage());
                 }
             }
-            connected = true;
             while (connected) {
                 try {
                     GPSData data;

@@ -31,8 +31,13 @@ public class SkippyLocation implements LocationDataSource {
         this.cloud = ParticleCloudSDK.getCloud();
         try {
             cloud.logIn(this.skippyLoginInformation.username, this.skippyLoginInformation.password);
+            // Particle API appears broken, it will appear to have logged in, but no devices will
+            // be reachable in the case of a bad username/password.  Coding this as a workaround
+            // to check to make sure a device is available to determine if login was successful
+            if (!cloud.isLoggedIn() || cloud.getDevices().size() < 1)
+                throw new Exception("Invalid Username or Password");
         } catch (Exception e) {
-            throw new Exception("Unable to connect: " + e.getMessage());
+            throw new Exception("Invalid Username or Password");
         }
         try {
             this.device = cloud.getDevices().get(0);
