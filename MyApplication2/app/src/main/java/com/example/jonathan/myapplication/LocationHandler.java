@@ -100,6 +100,7 @@ public class LocationHandler {
         }
     }
 
+    // Unsubscribe an object to be notified of GPS updates
     public void unsubscribeUpdates(GPSUpdate removeListener){
         synchronized (this.notificationSetLock){
             this.notificationSet.remove(removeListener);
@@ -128,20 +129,24 @@ public class LocationHandler {
             throw new Exception ("No error, but not connected.  This shouldn't happen.");
     }
 
+    // Stop helper thread and logout from data source
     public void logout() {
         this.connected = false;
         if (updateThread != null && updateThread.isAlive())
             updateThread.interrupt();
     }
 
+    // Set interval for automatic data refresh
     public void setAutomaticUpdates(boolean periodicUpdates) {
         this.periodicUpdatesEnabled = periodicUpdates;
     }
 
+    // Return connection status
     public boolean isConnected(){
         return this.connected && updateThread.isAlive();
     }
 
+    // Determine if the most recent data is "stale", as defined by minutesUntilStale
     public boolean isDataStale(){
         if (this.lastData != null && this.lastData.valid != false){
             long diffTimeInMs = this.lastData.timeStamp.getTime() - new Date().getTime(); // in ms
