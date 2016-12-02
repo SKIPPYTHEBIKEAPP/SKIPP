@@ -50,6 +50,7 @@ public class LocationHandler {
     private Context context;                        // context for android app (used by Particle API
                                                     // as well as sending tasks to UI thread
     private Thread updateThread;                    // thread used for checking for location updates
+    private UpdateServiceThread updateServiceThread;
     private final Set<GPSUpdate> notificationSet;   // collection of objects to notify upon GPS
                                                     // updates
     private final Object notificationSetLock = new Object();
@@ -78,7 +79,20 @@ public class LocationHandler {
 
     // Set the automatic GPS location update interval (in ms)
     public void setCheckInterval (long checkInterval) {
+        boolean forceUpdate = checkInterval < this.checkInterval;
+            // if we're changing to a more rapid interval, force an update so that the new
+            // interval will take effect before the old, longer interval elapses.
+
         this.checkInterval = checkInterval;
+        if (updateServiceThread != null)
+            updateServiceThread.setCheckInterval(checkInterval);
+
+        if (forceUpdate)
+            try {
+                this.forceUpdate();
+            } catch (Exception e) {
+                // no reason to handle exception here
+            }
     }
 
     // Getts the automatic GPS location update interval (in ms)
@@ -110,8 +124,9 @@ public class LocationHandler {
 
     // Begin the automated GPS location thread
     public void start() throws Exception {
-        this.updateThread = new Thread(new updateServiceThread(context,
-                locationDataSource, checkInterval));
+        this.updateServiceThread = new UpdateServiceThread(context,
+                locationDataSource, checkInterval);
+        this.updateThread = new Thread(this.updateServiceThread);
         this.updateThread.start();
         while (this.connected == false && this.fatalThreadError == false) {
             // wait to see if connection is established
@@ -165,17 +180,25 @@ public class LocationHandler {
 
     // Private helper class for thread to update GPS information.  Must be implemented as
     // a separate thread because the IO calls are blocking and cannot be done on the UI thread
-    private class updateServiceThread implements Runnable {
+    private class UpdateServiceThread implements Runnable {
         private SkippyLoginInformation skippyLoginInformation;
         private Context context;
         private LocationDataSource locationDataSource;
         private long checkInterval;
+        private Object intervalLock = new Object();
+        private GPSData previousGoodData = null;
 
-        public updateServiceThread(Context context,
+        public UpdateServiceThread(Context context,
                                    LocationDataSource locationDataSource, long checkInterval) {
             this.context = context;
             this.locationDataSource = locationDataSource;
             this.checkInterval = checkInterval;
+        }
+
+        public void setCheckInterval(long checkInterval){
+            synchronized (intervalLock){
+                this.checkInterval = checkInterval;
+            }
         }
 
         // Begin thread to update GPS information
@@ -205,10 +228,12 @@ public class LocationHandler {
                     GPSData data;
                     do {
                         data = this.locationDataSource.getUpdate();
-                        if (!data.valid)
+                        boolean duplicateData = (previousGoodData != null &&
+                                data.timeStamp.compareTo(previousGoodData.timeStamp) == 0);
+                        if (!data.valid || duplicateData)
                             try {
                                 // Data is invalid, wait a certain amount of time and try again
-                                Log.d("GPS", "Invalid data recieved.  Waiting for retry.");
+                                Log.d("GPS", "Invalid or duplicate data received.  Waiting for retry.");
                                 Thread.sleep(Configuration.invalidDataRecheckInterval);
                                 Log.d("GPS", "Re-trying to get valid GPS data.");
                             } catch (Exception e) {
@@ -219,8 +244,10 @@ public class LocationHandler {
                     if (data.valid) {     // Save result for future retrieval if data is valid
                         Log.d("GPS", "Distance moved since last data in meters: "  +
                                 data.distanceTo(lastData));
+
                         final GPSData finaledData = data;
                         lastData = data;
+                        previousGoodData = data;
                         // Notify all listeners of this new data if valid
                         ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
                             @Override
@@ -243,7 +270,11 @@ public class LocationHandler {
                     try {
                         // Sleep until timeout interval or until interrupted
                         do {
-                            Thread.sleep(this.checkInterval);
+                            long currentInterval;
+                            synchronized (intervalLock) {
+                                currentInterval = this.checkInterval;
+                            }
+                                Thread.sleep(currentInterval);
                         } while (!periodicUpdatesEnabled);  // Stay sleeping if periodic updates are disabled
                     } catch (Exception e) {
                         // Thread interrupted for an immediate update

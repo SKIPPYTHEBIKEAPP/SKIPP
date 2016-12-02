@@ -111,6 +111,10 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void ActivateLock(View view) {
+        // Check to make sure there's a connection before attempting to start lock service
+        if (Configuration.getLocationHandler() == null)
+            this.gpsDisconnected();
+
         final long msToMinutes = 1000 * 60;
 
         if (Configuration.getLockService() == null || (Configuration.getLockService() != null &&

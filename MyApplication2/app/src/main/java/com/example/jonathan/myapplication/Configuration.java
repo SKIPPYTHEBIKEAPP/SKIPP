@@ -9,7 +9,7 @@ public class Configuration {
     private static LocationHandler locationHandler = null;
     public static final long defaultAutomaticRefresh = 20000;       // in ms
     public static final long invalidDataRecheckInterval = 5000;     // in ms
-    public static final long acceptableMovement = 30;               // in meters
+    public static final long acceptableMovement = 10;               // in meters
     private static LockService lockService = null;
     private static MainActivity mainActivity = null;
 
