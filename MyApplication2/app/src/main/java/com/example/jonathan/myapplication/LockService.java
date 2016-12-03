@@ -119,6 +119,10 @@ public class LockService extends Service implements GPSUpdate {
         if (Configuration.getLocationHandler() != null) {
             Configuration.getLocationHandler().setAutomaticUpdates(false);
             Configuration.getLocationHandler().unsubscribeUpdates(this);
+
+            // reset polling interval in case alarm is being turned off while the polling interval
+            // has been set short.
+            Configuration.getLocationHandler().setCheckInterval(normalPollingInterval);
         }
         Configuration.setLockService(null);
     }
