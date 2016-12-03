@@ -228,7 +228,8 @@ public class LocationHandler {
                     GPSData data;
                     do {
                         data = this.locationDataSource.getUpdate();
-                        boolean duplicateData = (previousGoodData != null &&
+                        boolean duplicateData = ((previousGoodData != null &&
+                                                 previousGoodData.valid) &&
                                 data.timeStamp.compareTo(previousGoodData.timeStamp) == 0);
                         if (!data.valid || duplicateData)
                             try {
@@ -263,6 +264,7 @@ public class LocationHandler {
                     synchronized (threadErrorLock) {
                         fatalThreadError = true;
                         threadErrorMessage = "Error getting update: " + e.getMessage();
+                        Log.d("GPS", "Exception with GPS data source: " + e.getMessage());
                         connected = false;
                     }
                 }

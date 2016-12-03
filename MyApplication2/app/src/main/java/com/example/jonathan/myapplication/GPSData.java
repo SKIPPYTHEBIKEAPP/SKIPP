@@ -30,7 +30,7 @@ public class GPSData {
     }
 
     public static GPSData invalidData() {
-        return new GPSData(0, 0, (char) 0, (char) 0, 0, null, false);
+        return new GPSData(0, 0, (char) 0, (char) 0, 0, new Date(), false);
     }
 
     @Override
