@@ -43,6 +43,7 @@ public class LockService extends Service implements GPSUpdate {
             Configuration.setLockService(this);
             normalPollingInterval = locationHandler.getCheckInterval();
             locationHandler.setCheckInterval(rapidPollingInterval);
+            locationHandler.placeNotification();
         }
         return START_STICKY;
     }
@@ -128,6 +129,9 @@ public class LockService extends Service implements GPSUpdate {
             locationHandler.setCheckInterval(normalPollingInterval);
         }
         Configuration.setLockService(null);
+        Configuration.setLockIntent(null);
+        if (locationHandler != null)
+            locationHandler.placeNotification();
     }
     
 }

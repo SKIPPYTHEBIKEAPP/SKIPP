@@ -1,12 +1,18 @@
 package com.example.jonathan.myapplication;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * Created by dave on 11/4/2016.
@@ -178,6 +184,43 @@ public class LocationHandler {
         return this.lastData;
     }
 
+// *********************************************************************
+// Functions for system notification in status bar
+
+    private static final int NOTIFICATION_EX = 1;
+    private NotificationManager notificationManager;
+
+    public void placeNotification() {
+        notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        Intent intent = new Intent(context, MainActivity.class);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+
+        Notification.Builder builder = new Notification.Builder(context);
+
+        builder.setAutoCancel(false);
+        builder.setTicker("Skippy");
+        builder.setContentTitle("Skippy Location Manager is Connected");
+        if (Configuration.getLockService() != null)
+            builder.setContentText("Skippy is Armed");
+        else
+            builder.setContentText("Skippy is Disarmed");
+        builder.setSmallIcon(R.drawable.skippy2);
+        builder.setContentIntent(pendingIntent);
+        builder.setOngoing(true);
+        builder.setSubText("Skippy Location Manager");   //API level 16
+        builder.build();
+
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        notificationManager.notify(NOTIFICATION_EX, notification);
+    }
+
+    public void removeNotification() {
+        notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(NOTIFICATION_EX);
+    }
+
     // Private helper class for thread to update GPS information.  Must be implemented as
     // a separate thread because the IO calls are blocking and cannot be done on the UI thread
     private class UpdateServiceThread implements Runnable {
@@ -223,6 +266,7 @@ public class LocationHandler {
                     Log.d("GPS", "Unable to login: " + e.getMessage());
                 }
             }
+            placeNotification();
             while (connected) {
                 try {
                     GPSData data;
@@ -283,6 +327,7 @@ public class LocationHandler {
                     }
             }
             Log.d("GPS", "Connection to GPS service lost.");
+            removeNotification();
 
             // Connection has died, clean up this handler instance and notify subscribers
             Configuration.setLocationHandler(null);

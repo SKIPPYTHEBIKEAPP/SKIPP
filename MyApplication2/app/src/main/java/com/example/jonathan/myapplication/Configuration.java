@@ -1,5 +1,7 @@
 package com.example.jonathan.myapplication;
 
+import android.content.Intent;
+
 /**
  * Created by dave on 11/18/2016.
  */
@@ -11,6 +13,7 @@ public class Configuration {
     public static final long invalidDataRecheckInterval = 5000;     // in ms
     public static final long acceptableMovement = 10;               // in meters
     private static LockService lockService = null;
+    private static Intent lockIntent = null;
     private static MainActivity mainActivity = null;
 
     public static LocationHandler getLocationHandler(){
@@ -41,4 +44,8 @@ public class Configuration {
     public static void setMainActivity(MainActivity mainActivity){
         Configuration.mainActivity = mainActivity;
     }
+
+    public static Intent getLockIntent() { return Configuration.lockIntent; }
+
+    public static void setLockIntent(Intent lockIntent) { Configuration.lockIntent = lockIntent; }
 }

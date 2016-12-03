@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements GPSUpdate {
-    private Intent lockService = null;
+    private Intent lockService;
     ImageButton imgButton;
     ImageButton imgButton2;
     private double battery = -1;
@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Configuration.setMainActivity(this);
-
+        this.lockService = Configuration.getLockIntent();
         lockButton();
         batteryPercentage();
     }
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
             }
         }
         //subscribes to battery info
-        if (locationHandler != null)
+        if (locationHandler != null) {
             receiveUpdate(locationHandler.retrieveLastGPSData());
-
+        }
     }
 
 
@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
                 !Configuration.getLockService().getRunning())) {
             this.lockService = new Intent(this, LockService.class);
             startService(this.lockService);
+            Configuration.setLockIntent(this.lockService);
 
             // arming popup
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         } else {
             stopService(this.lockService);
             this.lockService = null;
+            Configuration.setLockIntent(this.lockService);
 
             //disable popupdumm
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -173,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
     public void alarmTrigger() {
         stopService(lockService);
+        this.lockService = null;
+        Configuration.setLockIntent(this.lockService);
         Intent intent = new Intent(this, AlarmActive.class);
         startActivity(intent);
     }
@@ -212,12 +216,15 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         imgButton.setImageResource(R.drawable.whiteunlock);
         imgButton.setAdjustViewBounds(true);
         imgButton.setBackgroundColor(Color.TRANSPARENT);
+        if (Configuration.getLockService() != null)
+            imgButton.setVisibility(View.INVISIBLE);
 
         imgButton2 = new ImageButton(this);
         imgButton2.setImageResource(R.drawable.redlock);
         imgButton2.setAdjustViewBounds(true);
         imgButton2.setBackgroundColor(Color.TRANSPARENT);
-        imgButton2.setVisibility(View.INVISIBLE);
+        if (Configuration.getLockService() == null)
+            imgButton2.setVisibility(View.INVISIBLE);
 
         linearLayout3.addView(imgButton2);
 
