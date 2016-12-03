@@ -54,6 +54,6 @@ public class DummyDataSource implements LocationDataSource {
         if (random.nextFloat() < dummyConfig.invalidDataProbability)
             return GPSData.invalidData();
         else
-            return new GPSData(lat, lon, latDir, lonDir, 11, new Date(), true);
+            return new GPSData(lat, lon, latDir, lonDir, 100, new Date(), true);
     }
 }

@@ -2,31 +2,26 @@ package com.example.jonathan.myapplication;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaPlayer;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.view.WindowManager;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements GPSUpdate {
     private Intent lockService = null;
-    ImageButton imgButton;
-    ImageButton imgButton2;
-    private double battery = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Configuration.setMainActivity(this);
-
-        lockButton();
-        batteryPercentage();
     }
 
     @Override
@@ -43,12 +38,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
                 gpsDisconnected();
             }
         }
-        //subscribes to battery info
-        if (Configuration.getLocationHandler() != null)
-            receiveUpdate(Configuration.getLocationHandler().retrieveLastGPSData());
-
     }
-
 
     /**
      * Called when the user clicks the Send button
@@ -59,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         if (Configuration.getLocationHandler() != null)
             Configuration.getLocationHandler().logout();
         Configuration.setLocationHandler(null);
-
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
     }
 
 
@@ -107,7 +98,14 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     }
 
 
+    /**
+     * Called when the user clicks the Send button
+     */
+    public void DisplayBattery(View view) {
+        Intent intent = new Intent(this, Battery.class);
 
+        startActivity(intent);
+    }
 
     /**
      * Called when the user clicks the Send button
@@ -172,16 +170,11 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         startActivity(intent);
     }
 
-    public void receiveUpdate(GPSData data) {
-        if (data.valid) {
-
-            battery = data.battery;
-            batteryPercentage();
-        }
-
+    public void receiveUpdate(GPSData data){
+        // do nothing, MainActivity doesn't care about location updates
     }
 
-    public void gpsDisconnected() {
+    public void gpsDisconnected(){
         // Service has been disconnected.  Clear out configuration dealing with connection and
         // prompt user to reconnect.
 
@@ -190,115 +183,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         Configuration.setLocationHandler(null);
         if (Configuration.getLockService() != null)
             Configuration.getLockService().onDestroy();
-
         // Restart activity to prompt re-login
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-    }
-
-    private void lockButton() {
-
-
-        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.linearLayout1);
-
-        LinearLayout linearLayout2 = (LinearLayout) findViewById(R.id.linearLayout2);
-        LinearLayout linearLayout3 = (LinearLayout) findViewById(R.id.linearLayout3);
-        imgButton = new ImageButton(this);
-        imgButton.setImageResource(R.drawable.whiteunlock);
-        imgButton.setAdjustViewBounds(true);
-        imgButton.setBackgroundColor(Color.TRANSPARENT);
-
-        imgButton2 = new ImageButton(this);
-        imgButton2.setImageResource(R.drawable.redlock);
-        imgButton2.setAdjustViewBounds(true);
-        imgButton2.setBackgroundColor(Color.TRANSPARENT);
-        imgButton2.setVisibility(View.INVISIBLE);
-
-        linearLayout3.addView(imgButton2);
-
-
-        linearLayout2.addView(imgButton);
-
-        imgButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (imgButton.getVisibility() == View.VISIBLE) {
-                    imgButton.setVisibility(View.INVISIBLE);
-                    imgButton2.setVisibility(View.VISIBLE);
-                    ActivateLock(v);
-
-                } else if (imgButton2.getVisibility() == View.VISIBLE) {
-                    imgButton.setVisibility(View.VISIBLE);
-                    imgButton2.setVisibility(View.INVISIBLE);
-                    ActivateLock(v);
-                }
-            }
-
-
-        });
-        imgButton2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (imgButton.getVisibility() == View.VISIBLE) {
-                    imgButton.setVisibility(View.INVISIBLE);
-                    imgButton2.setVisibility(View.VISIBLE);
-                    ActivateLock(v);
-
-                } else if (imgButton2.getVisibility() == View.VISIBLE) {
-                    imgButton.setVisibility(View.VISIBLE);
-                    imgButton2.setVisibility(View.INVISIBLE);
-                    ActivateLock(v);
-                }
-            }
-
-
-        });
-
-
-        ImageView image = new ImageView(MainActivity.this);
-    }
-
-    public void batteryPercentage() {
-
-        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.linearLayout1);
-
-        ImageView image = new ImageView(MainActivity.this);
-
-        image.setBackgroundResource(R.drawable.movie);
-
-        AnimationDrawable anim = (AnimationDrawable) image.getBackground();
-
-        for (int i = 0; i <= 4; i++) {
-            anim.start();
-
-        }
-        anim.start();
-
-        if (battery >= 100) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.batteryfull);
-        } else if (battery < 99 & battery >= 75) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.battery75);
-        } else if (battery < 75 & battery >= 50) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.battery50);
-        } else if (battery < 50 & battery >= 25) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.battery25);
-        }else if (battery < 25 & battery >= 10) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.batterylow);
-        }else if (battery < 10 & battery >= 0) {
-            linearLayout1.removeAllViews();
-            image.setImageResource(R.drawable.batteryzero);
-        }
-        else {
-
-        }
-
-        linearLayout1.addView(image);
-
-
     }
 }
