@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     ImageButton imgButton;
     ImageButton imgButton2;
     private double battery = -1;
+    private boolean destroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,14 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         }
     }
 
+    protected void onDestroy() {
+        super.onDestroy();
+        destroyed = true;
+        LocationHandler handler = Configuration.getLocationHandler();
+        if (handler != null){
+            handler.logout();
+        }
+    }
 
     /**
      * Called when the user clicks the Send button
@@ -201,8 +210,10 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
             Configuration.getLockService().onDestroy();
 
         // Restart activity to prompt re-login
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        if (!destroyed) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
     }
 
     private void lockButton() {
