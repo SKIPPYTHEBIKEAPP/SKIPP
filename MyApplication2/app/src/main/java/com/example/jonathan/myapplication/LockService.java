@@ -34,14 +34,15 @@ public class LockService extends Service implements GPSUpdate {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Let it continue running until it is stopped.
-        if (Configuration.getLocationHandler() != null){
-            Configuration.getLocationHandler().subscribeUpdates(this);
-            Configuration.getLocationHandler().setAutomaticUpdates(true);
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null){
+            locationHandler.subscribeUpdates(this);
+            locationHandler.setAutomaticUpdates(true);
             Toast.makeText(this, "Alarm Set", Toast.LENGTH_LONG).show();
             this.isRunning = true;
             Configuration.setLockService(this);
-            normalPollingInterval = Configuration.getLocationHandler().getCheckInterval();
-            Configuration.getLocationHandler().setCheckInterval(rapidPollingInterval);
+            normalPollingInterval = locationHandler.getCheckInterval();
+            locationHandler.setCheckInterval(rapidPollingInterval);
         }
         return START_STICKY;
     }
@@ -52,6 +53,7 @@ public class LockService extends Service implements GPSUpdate {
 
     public void receiveUpdate(GPSData data){
         // Just in case the initial data was not available when lock was set
+        LocationHandler locationHandler = Configuration.getLocationHandler();
         if (initialPolling) {
             initialLocationCount++;
             double newLon = tempLon * (initialLocationCount - 1) / initialLocationCount;
@@ -62,8 +64,8 @@ public class LockService extends Service implements GPSUpdate {
             if (initialLocationCount == initialLocationCountTarget) {
                 initialPolling = false;
                 initialLocationCount = 0;
-                if (Configuration.getLocationHandler() != null)
-                    Configuration.getLocationHandler().setCheckInterval(normalPollingInterval);
+                if (locationHandler != null)
+                    locationHandler.setCheckInterval(normalPollingInterval);
 
                 initialGPSLocation = new GPSData(tempLat, tempLon, data.latDir, data.lonDir,
                         data.battery, data.timeStamp, data.valid);
@@ -75,15 +77,15 @@ public class LockService extends Service implements GPSUpdate {
             if (data.distanceTo(initialGPSLocation) < Configuration.acceptableMovement)
             {
                 // Device has returned to acceptable range
-                if (Configuration.getLocationHandler() != null)
-                    Configuration.getLocationHandler().setCheckInterval(normalPollingInterval);
+                if (locationHandler != null)
+                    locationHandler.setCheckInterval(normalPollingInterval);
                 Log.d("Alarm Service", "Device within range.  Cancelling alarm.");
                 confirmLocationCount = 0;
                 confirmMovement = false;
             } else if (confirmLocationCount == confirmLocationCountTarget && confirmMovement) {
                 // Device has not returned to acceptable range
-                if (Configuration.getLocationHandler() != null)
-                    Configuration.getLocationHandler().setCheckInterval(normalPollingInterval);
+                if (locationHandler != null)
+                    locationHandler.setCheckInterval(normalPollingInterval);
                 Log.d("Alarm Service", "Device outside range.  Sounding alarm.");
                 confirmLocationCount = 0;
                 confirmMovement = false;
@@ -97,8 +99,8 @@ public class LockService extends Service implements GPSUpdate {
             if (data.distanceTo(initialGPSLocation) > Configuration.acceptableMovement){
                 confirmMovement = true;
                 confirmLocationCount = 0;
-                if (Configuration.getLocationHandler() != null)
-                    Configuration.getLocationHandler().setCheckInterval(rapidPollingInterval);
+                if (locationHandler != null)
+                    locationHandler.setCheckInterval(rapidPollingInterval);
 
                 receiveUpdate(data);        // recursively call to include this location into
                                             // location averaging
@@ -116,13 +118,14 @@ public class LockService extends Service implements GPSUpdate {
         super.onDestroy();
         this.isRunning = false;
         Toast.makeText(this, "Alarm Deactivated", Toast.LENGTH_LONG).show();
-        if (Configuration.getLocationHandler() != null) {
-            Configuration.getLocationHandler().setAutomaticUpdates(false);
-            Configuration.getLocationHandler().unsubscribeUpdates(this);
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null) {
+            locationHandler.setAutomaticUpdates(false);
+            locationHandler.unsubscribeUpdates(this);
 
             // reset polling interval in case alarm is being turned off while the polling interval
             // has been set short.
-            Configuration.getLocationHandler().setCheckInterval(normalPollingInterval);
+            locationHandler.setCheckInterval(normalPollingInterval);
         }
         Configuration.setLockService(null);
     }

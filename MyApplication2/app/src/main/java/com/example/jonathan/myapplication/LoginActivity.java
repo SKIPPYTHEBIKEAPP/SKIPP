@@ -48,6 +48,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private boolean loginInProgress = false;            // prevent repeated hitting of 'login'
+                                                        // button from causing multiple concurrent
+                                                        // login attempts
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,12 +83,49 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Don't allow user to be on this form if they are currently logged in.  User should
+        // logout first.
+
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null) {
+            showProgress(false);
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton.setEnabled(true);
+    }
+
+
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton.setEnabled(false);
+
+        // Don't allow user to be on this form if they are currently logged in.  User should
+        // logout first.
+
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+
+        if (loginInProgress)
+            return;
 
         // Reset errors.
         mEmailView.setError(null);
@@ -116,7 +156,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
-        } else {
+        } else if (!loginInProgress){
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
@@ -137,16 +177,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Configuration.defaultAutomaticRefresh, 15, this));
 
             try {
+                loginInProgress = true;
                 Configuration.getLocationHandler().start();
                 Toast.makeText(this, "Login Successful", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 Configuration.setLocationHandler(null);
             }
-
             showProgress(false);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            loginInProgress = false;
         }
     }
 

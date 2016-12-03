@@ -25,8 +25,9 @@ public class Location extends AppCompatActivity implements GPSUpdate{
         //LocationDataSource source = new SkippyLocation();
         //LocationDataSource source = new DummyDataSource();
         //handler = new LocationHandler(source, 10000, login, this);
-        if (Configuration.getLocationHandler() != null)
-            Configuration.getLocationHandler().subscribeUpdates(this);
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null)
+            locationHandler.subscribeUpdates(this);
     }
 
     public double getLon(){

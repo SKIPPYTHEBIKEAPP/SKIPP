@@ -32,20 +32,22 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     @Override
     protected void onStart() {
         super.onStart();
-        if (Configuration.getLocationHandler() == null) {
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler == null) {
             Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         } else {
-            if (Configuration.getLocationHandler().isConnected()) {
+            if (locationHandler.isConnected()) {
                 // subscribe to notifications so disconnections can be appropriated dealt with
-                Configuration.getLocationHandler().subscribeUpdates(this);
+                locationHandler.subscribeUpdates(this);
             } else {
                 gpsDisconnected();
             }
         }
         //subscribes to battery info
-        if (Configuration.getLocationHandler() != null)
-            receiveUpdate(Configuration.getLocationHandler().retrieveLastGPSData());
+        if (locationHandler != null)
+            receiveUpdate(locationHandler.retrieveLastGPSData());
 
     }
 
@@ -54,10 +56,12 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void DisplaySetting(View view) {
-        if (Configuration.getLockService() != null)
-            Configuration.getLockService().onDestroy();
-        if (Configuration.getLocationHandler() != null)
-            Configuration.getLocationHandler().logout();
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        LockService lockService = Configuration.getLockService();
+        if (lockService != null)
+            lockService.onDestroy();
+        if (locationHandler != null)
+            locationHandler.logout();
         Configuration.setLocationHandler(null);
 
     }
@@ -70,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         final Intent intent = new Intent(this, GPSLocation.class);
 
         //Test to see if there is a recent location update
-        if (Configuration.getLocationHandler() != null &&
-                Configuration.getLocationHandler().isDataStale()) {
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null && locationHandler.isDataStale()) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Not found!");
             alertDialog.setMessage("Last location reported will be shown");
@@ -114,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      */
     public void ActivateLock(View view) {
         // Check to make sure there's a connection before attempting to start lock service
-        if (Configuration.getLocationHandler() == null)
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler == null)
             this.gpsDisconnected();
 
         final long msToMinutes = 1000 * 60;
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Device Armed");
             alertDialog.setMessage("Location will be updated every " +
-                    Long.toString(Configuration.getLocationHandler().getCheckInterval() /
+                    Long.toString(locationHandler.getCheckInterval() /
                             msToMinutes) + " minutes. " +
                     "You can still manually update at any time by tapping the Location button. " +
                     "Changes in location will trigger an alarm on your device.  " +

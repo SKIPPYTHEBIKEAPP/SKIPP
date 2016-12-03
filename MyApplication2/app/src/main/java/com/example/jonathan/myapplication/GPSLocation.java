@@ -33,9 +33,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
         final Button refreashButton = (Button) findViewById(R.id.refreshbutton);
         refreashButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (Configuration.getLocationHandler() != null) {
+                LocationHandler locationHandler = Configuration.getLocationHandler();
+                if (locationHandler != null) {
                     try {
-                        Configuration.getLocationHandler().forceUpdate();
+                        locationHandler.forceUpdate();
                     } catch (Exception e) {
                         // might want to display an error if it can't refresh?
                     }
@@ -48,8 +49,9 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onStart() {
         super.onStart();
-        if (Configuration.getLocationHandler() != null) {
-            Configuration.getLocationHandler().subscribeUpdates(this);
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null) {
+            locationHandler.subscribeUpdates(this);
         }
     }
 
@@ -68,8 +70,9 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
 
         // Now that map has appeared, get a valid location instead of waiting for the
         // interval timeout
-        if (Configuration.getLocationHandler() != null)
-            receiveUpdate(Configuration.getLocationHandler().retrieveLastGPSData());
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null)
+            receiveUpdate(locationHandler.retrieveLastGPSData());
     }
 
     // GPSUpdate interface:
@@ -83,7 +86,10 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
             LatLng currentLocation = new LatLng(lat, lon);
 
             mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
+
+            // changed from animate camera to movecamera, incoming GPS updates while panning
+            // is in progress messed with the map zoom levels
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
                     mMap.getCameraPosition().zoom));
         }
     }
