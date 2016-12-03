@@ -201,11 +201,13 @@ public class LocationHandler {
         builder.setAutoCancel(false);
         builder.setTicker("Skippy");
         builder.setContentTitle("Skippy Location Manager is Connected");
-        if (Configuration.getLockService() != null)
+        if (Configuration.getLockService() != null) {
             builder.setContentText("Skippy is Armed");
-        else
+            builder.setSmallIcon(R.drawable.redlock);
+        } else {
             builder.setContentText("Skippy is Disarmed");
-        builder.setSmallIcon(R.drawable.skippy2);
+            builder.setSmallIcon(R.drawable.whiteunlock);
+        }
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         builder.setSubText("Skippy Location Manager");   //API level 16
