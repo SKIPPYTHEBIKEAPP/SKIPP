@@ -12,7 +12,7 @@ public class DummyDataSourceConfig {
 
 
     public DummyDataSourceConfig(){
-        movementSpeed = .00003;
+        movementSpeed = .000045;
         invalidDataProbability = .05;
         connectFailProbability = 0.0;
         invalidLogin = false;

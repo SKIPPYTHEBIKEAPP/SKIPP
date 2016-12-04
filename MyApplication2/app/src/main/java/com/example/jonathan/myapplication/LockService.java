@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +27,8 @@ public class LockService extends Service implements GPSUpdate {
     private double tempLon;                                 // Temporary variables used in location
     private double tempLat;                                 // averaging
 
+    PowerManager.WakeLock wakeLock = null;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -44,6 +47,11 @@ public class LockService extends Service implements GPSUpdate {
             normalPollingInterval = locationHandler.getCheckInterval();
             locationHandler.setCheckInterval(rapidPollingInterval);
             locationHandler.placeNotification();
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Skippy Secure Alarm");
+            wakeLock.acquire();
+        } else {
+            onDestroy();
         }
         return START_STICKY;
     }
@@ -132,6 +140,8 @@ public class LockService extends Service implements GPSUpdate {
         Configuration.setLockIntent(null);
         if (locationHandler != null)
             locationHandler.placeNotification();
+        if (wakeLock != null)
+            wakeLock.release();
     }
     
 }
