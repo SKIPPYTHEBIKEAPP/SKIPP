@@ -16,6 +16,9 @@ public class Configuration {
     private static Intent lockIntent = null;
     private static MainActivity mainActivity = null;
 
+    // Flag to indicate if app is in the process of terminating
+    private static boolean terminate = false;
+
     public static LocationHandler getLocationHandler(){
         return Configuration.locationHandler;
     }
@@ -48,4 +51,8 @@ public class Configuration {
     public static Intent getLockIntent() { return Configuration.lockIntent; }
 
     public static void setLockIntent(Intent lockIntent) { Configuration.lockIntent = lockIntent; }
+
+    public static boolean getTerminate() { return Configuration.terminate; }
+
+    public static void setTerminate(boolean terminate) { Configuration.terminate = terminate; }
 }

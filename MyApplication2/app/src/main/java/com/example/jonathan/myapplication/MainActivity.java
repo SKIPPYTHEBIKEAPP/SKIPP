@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     ImageButton imgButton;
     ImageButton imgButton2;
     private double battery = -1;
-    private boolean destroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +53,9 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
     protected void onDestroy() {
         super.onDestroy();
-        destroyed = true;
+
+        // set terminate flag to prevent login screen from appearing after connection is terminated
+        Configuration.setTerminate(true);
         LocationHandler handler = Configuration.getLocationHandler();
         if (handler != null){
             handler.logout();
@@ -203,14 +204,14 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         // Service has been disconnected.  Clear out configuration dealing with connection and
         // prompt user to reconnect.
 
-        Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.", Toast.LENGTH_LONG).show();
-
         Configuration.setLocationHandler(null);
         if (Configuration.getLockService() != null)
             Configuration.getLockService().onDestroy();
 
         // Restart activity to prompt re-login
-        if (!destroyed) {
+        if (!Configuration.getTerminate()) {
+            Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.",
+                    Toast.LENGTH_LONG).show();
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
