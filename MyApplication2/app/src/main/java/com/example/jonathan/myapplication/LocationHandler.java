@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -357,6 +358,13 @@ public class LocationHandler {
                     } catch (Exception e) {
                         // Thread interrupted for an immediate update
                     }
+                ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Helper thread pulse", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             }
             Log.d("GPS", "Connection to GPS service lost.");
             ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
@@ -374,6 +382,7 @@ public class LocationHandler {
                     synchronized (notificationSetLock) {
                         for (GPSUpdate listener : notificationSet) {
                             listener.gpsDisconnected();
+                            Log.d("GPS", "Sending disconnect notification to: " + listener.toString());
                         }
                         notificationSet.clear();
                     }

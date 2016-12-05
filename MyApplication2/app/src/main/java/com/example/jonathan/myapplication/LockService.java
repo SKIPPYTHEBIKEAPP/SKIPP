@@ -145,7 +145,7 @@ public class LockService extends Service implements GPSUpdate {
         }
         Configuration.setLockService(null);
         Configuration.setLockIntent(null);
-        if (locationHandler != null && locationHandler.isConnected())
+        if (locationHandler != null)
             locationHandler.placeNotification();
         if (wakeLock != null)
             wakeLock.release();

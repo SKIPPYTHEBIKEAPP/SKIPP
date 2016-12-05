@@ -24,7 +24,9 @@ public class Configuration {
     }
 
     public static void setLocationHandler(LocationHandler locationHandler){
-        Configuration.locationHandler = locationHandler;
+        synchronized (ConfigurationLock){
+            Configuration.locationHandler = locationHandler;
+        }
     }
 
     public static void setLocationHandlerIfNull(LocationHandler locationHandler){
