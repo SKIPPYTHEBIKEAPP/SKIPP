@@ -12,8 +12,8 @@
 
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
+    <string name="prompt_email">Particle Email</string>
+    <string name="prompt_password">Particle Password</string>
     <string name="action_sign_in">Sign In</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
@@ -23,6 +23,10 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="login_guide">*Valid Particle Credentials Required</string>
+    <string name="powered_by">Powered by Particle</string>
+    <string name="register_question">Need a Particle Account?</string>
+    <string name="register_link">Click <a href="https://login.particle.io/signup">here</a> to register</string>
     <string name="title_activity_gpslocation">Map</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_alarm_active">AlarmActive</string>
