@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -28,6 +29,7 @@ public class AlarmActive extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -40,6 +42,7 @@ public class AlarmActive extends AppCompatActivity {
         alertDialog.setTitle("Alarm Triggered!!!");
         alertDialog.setMessage("The location of your device has changed. " +
                 "Press okay OK to halt alarm sound. ");
+        mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mp.start();
 
         //"OK" stops sound, at least it should...

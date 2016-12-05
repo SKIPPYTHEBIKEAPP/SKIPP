@@ -3,6 +3,7 @@ package com.example.jonathan.myapplication;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -12,7 +13,7 @@ public class LockService extends Service implements GPSUpdate {
     private GPSData initialGPSLocation = null;
     private boolean isRunning = false;
     private long normalPollingInterval = 0;
-    private final long rapidPollingInterval = 2000;         // in ms
+    private final long rapidPollingInterval = 5000;         // in ms
     private boolean initialPolling = true;                  // flag indicating alarm is establishing
                                                             // initial location
     private boolean confirmMovement = false;                // flag indicating alarm believes that
@@ -21,13 +22,14 @@ public class LockService extends Service implements GPSUpdate {
 
     private int initialLocationCount = 0;                   // Counters for location averaging
     private int confirmLocationCount = 0;
-    private final int initialLocationCountTarget = 5;       // Target number of size of data to average
-    private final int confirmLocationCountTarget = 10;
+    private final int initialLocationCountTarget = 3;       // Target number of size of data to average
+    private final int confirmLocationCountTarget = 3;
 
     private double tempLon;                                 // Temporary variables used in location
     private double tempLat;                                 // averaging
 
     PowerManager.WakeLock wakeLock = null;
+    WifiManager.WifiLock wifiLock = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -50,6 +52,11 @@ public class LockService extends Service implements GPSUpdate {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Skippy Secure Alarm");
             wakeLock.acquire();
+            WifiManager wifiManager = (WifiManager) getSystemService(this.WIFI_SERVICE);
+            if (wifiManager != null) {
+                wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "Skippy Secure Alarm");
+                wifiLock.acquire();
+            }
         } else {
             onDestroy();
         }
@@ -138,10 +145,12 @@ public class LockService extends Service implements GPSUpdate {
         }
         Configuration.setLockService(null);
         Configuration.setLockIntent(null);
-        if (locationHandler != null)
+        if (locationHandler != null && locationHandler.isConnected())
             locationHandler.placeNotification();
         if (wakeLock != null)
             wakeLock.release();
+        if (wifiLock != null)
+            wifiLock.release();
     }
     
 }

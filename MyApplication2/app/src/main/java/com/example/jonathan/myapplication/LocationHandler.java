@@ -3,6 +3,9 @@ package com.example.jonathan.myapplication;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -164,7 +167,7 @@ public class LocationHandler {
 
     // Return connection status
     public boolean isConnected(){
-        return this.connected && updateThread.isAlive();
+        return this.connected && (updateThread != null && updateThread.isAlive());
     }
 
     // Determine if the most recent data is "stale", as defined by minutesUntilStale
@@ -191,31 +194,39 @@ public class LocationHandler {
     private NotificationManager notificationManager;
 
     public void placeNotification() {
-        notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        Intent intent = new Intent(context, MainActivity.class);
+        if (updateThread != null && updateThread.isAlive()) {
+            notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            Intent intent = new Intent(context, MainActivity.class);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
 
-        Notification.Builder builder = new Notification.Builder(context);
+            Notification.Builder builder = new Notification.Builder(context);
 
-        builder.setAutoCancel(false);
-        builder.setTicker("Skippy");
-        builder.setContentTitle("Skippy Location Manager is Connected");
-        if (Configuration.getLockService() != null) {
-            builder.setContentText("Skippy is Armed");
-            builder.setSmallIcon(R.drawable.redlock);
+            builder.setAutoCancel(false);
+            builder.setTicker("Skippy");
+            builder.setContentTitle("Skippy Location Manager is Connected");
+            if (Configuration.getLockService() != null) {
+                builder.setContentText("Skippy is Armed");
+                builder.setSmallIcon(R.drawable.redlock);
+            } else {
+                builder.setContentText("Skippy is Disarmed");
+                builder.setSmallIcon(R.drawable.whiteunlock);
+            }
+            builder.setContentIntent(pendingIntent);
+            builder.setOngoing(true);
+            builder.setSubText("Skippy Location Manager");   //API level 16
+            builder.build();
+
+            Notification notification = builder.build();
+            notification.flags |= Notification.FLAG_ONGOING_EVENT;
+            notificationManager.notify(NOTIFICATION_EX, notification);
         } else {
-            builder.setContentText("Skippy is Disarmed");
-            builder.setSmallIcon(R.drawable.whiteunlock);
+            removeNotification();
+            Configuration.setLocationHandler(null);
+            MainActivity ma = Configuration.getMainActivity();
+            if (ma != null)
+                ma.gpsDisconnected();
         }
-        builder.setContentIntent(pendingIntent);
-        builder.setOngoing(true);
-        builder.setSubText("Skippy Location Manager");   //API level 16
-        builder.build();
-
-        Notification notification = builder.build();
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        notificationManager.notify(NOTIFICATION_EX, notification);
     }
 
     public void removeNotification() {
@@ -268,7 +279,11 @@ public class LocationHandler {
                     Log.d("GPS", "Unable to login: " + e.getMessage());
                 }
             }
-            placeNotification();
+            ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    placeNotification();
+                }});
             while (connected) {
                 try {
                     GPSData data;
@@ -329,7 +344,11 @@ public class LocationHandler {
                     }
             }
             Log.d("GPS", "Connection to GPS service lost.");
-            removeNotification();
+            ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    removeNotification();
+                }});
 
             // Connection has died, clean up this handler instance and notify subscribers
             Configuration.setLocationHandler(null);

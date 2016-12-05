@@ -51,6 +51,10 @@ public class DummyDataSource implements LocationDataSource {
         lat += random.nextFloat() * dummyConfig.movementSpeed * latMovementDirection;
         lon += random.nextFloat() * dummyConfig.movementSpeed * lonMovementDirection;
 
+        Date time = new Date();
+        if (time.getMinutes() % dummyConfig.intervalBigJump == 0)
+            lat += 1;
+
         if (random.nextFloat() < dummyConfig.invalidDataProbability)
             return GPSData.invalidData();
         else
