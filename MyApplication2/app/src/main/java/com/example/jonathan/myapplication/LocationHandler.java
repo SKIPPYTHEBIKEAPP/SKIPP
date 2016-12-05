@@ -8,6 +8,8 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -72,6 +74,8 @@ public class LocationHandler {
     private volatile String threadErrorMessage;     // Error message in case of thread error
     private final Object threadErrorLock = new Object();
                                                     // concurrency lock for thread errors
+    final PowerManager.WakeLock wakeLock;
+    final WifiManager.WifiLock wifiLock;
 
     public LocationHandler (LocationDataSource locationDataSource, long checkInterval,
                             int minutesUntilStale, Context context) {
@@ -84,6 +88,14 @@ public class LocationHandler {
         this.connected = false;
         this.fatalThreadError = false;
         this.threadErrorMessage = "";
+        PowerManager powerManager = (PowerManager) context.getSystemService(context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Skippy Location");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
+        if (wifiManager != null) {
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "Skippy Location");
+        } else {
+            wifiLock = null;
+        }
     }
 
     // Set the automatic GPS location update interval (in ms)
@@ -261,6 +273,9 @@ public class LocationHandler {
         @Override
         public void run() {
             connected = false;
+            wakeLock.acquire();
+            if (wifiLock != null)
+                wifiLock.acquire();
             try {
                 this.locationDataSource.init(this.context);
             } catch (Exception e) {
@@ -364,6 +379,9 @@ public class LocationHandler {
                     }
                 }
             });
+            wakeLock.release();
+            if (wifiLock != null)
+                wifiLock.release();
         }
     }
 }
