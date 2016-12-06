@@ -142,8 +142,8 @@ public class LocationHandler {
     // Unsubscribe an object to be notified of GPS updates
     public void unsubscribeUpdates(GPSUpdate removeListener){
         synchronized (this.notificationSetLock){
-            this.notificationSet.remove(removeListener);
             Log.d("GPS", "Removing " + removeListener.toString() + " from GPS event listener pool.");
+            this.notificationSet.remove(removeListener);
         }
     }
 
@@ -377,20 +377,15 @@ public class LocationHandler {
                     } catch (Exception e) {
                         // Thread interrupted for an immediate update
                     }
-                ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "Helper thread pulse", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
             }
             Log.d("GPS", "Connection to GPS service lost.");
+            removeNotification();
+            /*   not running in UI thread since UI thread won't necessarily exist when app is terminating
             ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     removeNotification();
-                }});
+                }}); */
 
             // Connection has died, clean up this handler instance and notify subscribers
             Configuration.setLocationHandler(null);
@@ -398,15 +393,20 @@ public class LocationHandler {
             ((AppCompatActivity) this.context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    for (GPSUpdate listener : notificationSet) {
+                        listener.gpsDisconnected();
+                        Log.d("GPS", "Sending disconnect notification to: " + listener.toString());
+                    }
+                    // Do this in the UI thread to ensure that all notifications are sent
+                    // before set is cleared
                     synchronized (notificationSetLock) {
-                        for (GPSUpdate listener : notificationSet) {
-                            listener.gpsDisconnected();
-                            Log.d("GPS", "Sending disconnect notification to: " + listener.toString());
-                        }
+                        Log.d("GPS", "Clearing notification set.");
                         notificationSet.clear();
                     }
+
                 }
             });
+            Log.d("GPS", "Releasing wakelocks");
             wakeLock.release();
             if (wifiLock != null)
                 wifiLock.release();

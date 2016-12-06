@@ -215,10 +215,6 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         // Service has been disconnected.  Clear out configuration dealing with connection and
         // prompt user to reconnect.
 
-        Configuration.setLocationHandler(null);
-        if (Configuration.getLockService() != null)
-            Configuration.getLockService().onDestroy();
-
         // Restart activity to prompt re-login
         if (!Configuration.getTerminate()) {
             Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.",

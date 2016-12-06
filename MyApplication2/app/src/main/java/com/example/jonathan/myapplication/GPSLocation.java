@@ -3,10 +3,12 @@ package com.example.jonathan.myapplication;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.cast.CastRemoteDisplay;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -94,8 +96,18 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    public void gpsDisconnected(){
+    public void gpsDisconnected() {
         //Toast.makeText(this, "GPS Location Service Failure", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("GPSLocation", "Map onDestroy");
+        super.onDestroy();
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (locationHandler != null) {
+            locationHandler.unsubscribeUpdates(this);
+        }
     }
 
 }

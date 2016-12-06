@@ -69,7 +69,7 @@ public class LockService extends Service implements GPSUpdate {
     }
 
     public void receiveUpdate(GPSData data){
-        Log.d("Alarm Service", this.toString()+ " GPS update");
+        Log.d("LockService", this.toString()+ " GPS update");
         // Just in case the initial data was not available when lock was set
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (initialPolling) {
@@ -88,7 +88,7 @@ public class LockService extends Service implements GPSUpdate {
                 initialGPSLocation = new GPSData(tempLat, tempLon, data.latDir, data.lonDir,
                         data.battery, data.timeStamp, data.valid);
 
-                Log.d("Alarm Service", "Alarm initial location set: " + initialGPSLocation);
+                Log.d("LockService", "Alarm initial location set: " + initialGPSLocation);
             }
         } else if (confirmMovement) {
             confirmLocationCount++;
@@ -97,20 +97,20 @@ public class LockService extends Service implements GPSUpdate {
                 // Device has returned to acceptable range
                 if (locationHandler != null)
                     locationHandler.setCheckInterval(normalPollingInterval);
-                Log.d("Alarm Service", "Device within range.  Cancelling alarm.");
+                Log.d("LockService", "Device within range.  Cancelling alarm.");
                 confirmLocationCount = 0;
                 confirmMovement = false;
             } else if (confirmLocationCount == confirmLocationCountTarget && confirmMovement) {
                 // Device has not returned to acceptable range
                 if (locationHandler != null)
                     locationHandler.setCheckInterval(normalPollingInterval);
-                Log.d("Alarm Service", "Device outside range.  Sounding alarm.");
+                Log.d("LockService", "Device outside range.  Sounding alarm.");
                 confirmLocationCount = 0;
                 confirmMovement = false;
                 if (Configuration.getMainActivity() != null)
                     Configuration.getMainActivity().alarmTrigger();
             } else {
-                Log.d("Alarm Service", "Device outside range, checking to see if it returns.  " +
+                Log.d("LockService", "Device outside range, checking to see if it returns.  " +
                         "Current distance: " + data.distanceTo(initialGPSLocation));
             }
         } else {
@@ -129,7 +129,8 @@ public class LockService extends Service implements GPSUpdate {
     public void gpsDisconnected(){
         Log.d("LockService", toString() + " received GPS disconnect signal.");
         //Toast.makeText(this, "GPS Disconnected", Toast.LENGTH_LONG).show();
-        onDestroy();
+        this.stopSelf();
+        //onDestroy();
     }
 
     @Override
@@ -140,6 +141,7 @@ public class LockService extends Service implements GPSUpdate {
         Toast.makeText(this, "Alarm Deactivated", Toast.LENGTH_LONG).show();
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (locationHandler != null) {
+            locationHandler.setCheckInterval(normalPollingInterval);
             locationHandler.setAutomaticUpdates(false);
             locationHandler.unsubscribeUpdates(this);
 
