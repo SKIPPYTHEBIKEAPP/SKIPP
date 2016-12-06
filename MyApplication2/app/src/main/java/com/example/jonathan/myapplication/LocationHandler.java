@@ -80,6 +80,7 @@ public class LocationHandler {
 
     public LocationHandler (LocationDataSource locationDataSource, long checkInterval,
                             int minutesUntilStale, Context context) {
+        Log.d("LocationHandler", "Creating new location handler " + this.toString());
         this.locationDataSource = locationDataSource;
         this.checkInterval = checkInterval;
         this.context = context;
@@ -101,6 +102,7 @@ public class LocationHandler {
 
     // Set the automatic GPS location update interval (in ms)
     public void setCheckInterval (long checkInterval) {
+        Log.d("LocationHandler", this.toString() + " setting interval to" + Long.toString(checkInterval));
         boolean forceUpdate = checkInterval < this.checkInterval;
             // if we're changing to a more rapid interval, force an update so that the new
             // interval will take effect before the old, longer interval elapses.
@@ -122,6 +124,7 @@ public class LocationHandler {
 
     // Cause an immediate GPS location update
     public void forceUpdate() throws Exception {
+        Log.d("LocationHandler", this.toString() + " force update");
         if (this.connected && this.updateThread.isAlive())
             this.updateThread.interrupt();
         else
@@ -168,6 +171,7 @@ public class LocationHandler {
 
     // Stop helper thread and logout from data source
     public void logout() {
+        Log.d("LocationHandler", this.toString() + " logout");
         this.connected = false;
         if (updateThread != null && updateThread.isAlive())
             updateThread.interrupt();
@@ -175,16 +179,20 @@ public class LocationHandler {
 
     // Set interval for automatic data refresh
     public void setAutomaticUpdates(boolean periodicUpdates) {
+        Log.d("LocationHandler", this.toString() + " auto updates: " + periodicUpdates);
         this.periodicUpdatesEnabled = periodicUpdates;
     }
 
     // Return connection status
     public boolean isConnected(){
+        Log.d("LocationHandler", this.toString() + " connected query: "
+                + (this.connected && updateThread.isAlive()));
         return this.connected && (updateThread != null && updateThread.isAlive());
     }
 
     // Determine if the most recent data is "stale", as defined by minutesUntilStale
     public boolean isDataStale(){
+        Log.d("LocationHandler", this.toString() + " stale query");
         if (this.lastData != null && this.lastData.valid != false){
             long diffTimeInMs = this.lastData.timeStamp.getTime() - new Date().getTime(); // in ms
             long diffTimeInMinutes = Math.abs(diffTimeInMs / (1000 * 60));  // convert ms to minutes
@@ -208,6 +216,7 @@ public class LocationHandler {
 
     public void placeNotification() {
         if (updateThread != null && updateThread.isAlive()) {
+            Log.d("LocationHandler", this.toString() + "Placing notification (connected)");
             notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             Intent intent = new Intent(context, MainActivity.class);
 
@@ -234,6 +243,8 @@ public class LocationHandler {
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
             notificationManager.notify(NOTIFICATION_EX, notification);
         } else {
+            Log.d("LocationHandler", this.toString() + " was requested to place a " +
+                    "notification, but removing instead (not connected)");
             removeNotification();
             Configuration.setLocationHandler(null);
             MainActivity ma = Configuration.getMainActivity();
@@ -243,6 +254,7 @@ public class LocationHandler {
     }
 
     public void removeNotification() {
+        Log.d("LocationHandler", this.toString() + " removing notification");
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_EX);
     }
@@ -259,12 +271,14 @@ public class LocationHandler {
 
         public UpdateServiceThread(Context context,
                                    LocationDataSource locationDataSource, long checkInterval) {
+            Log.d("GPS Thread", "Creating new update thread: " + this.toString());
             this.context = context;
             this.locationDataSource = locationDataSource;
             this.checkInterval = checkInterval;
         }
 
         public void setCheckInterval(long checkInterval){
+            Log.d("GPS Thread", this.toString()+ " Setting interval to " + Long.toString(checkInterval));
             synchronized (intervalLock){
                 this.checkInterval = checkInterval;
             }
@@ -331,8 +345,10 @@ public class LocationHandler {
                             @Override
                             public void run() {
                                 synchronized (notificationSetLock) {
-                                    for (GPSUpdate listener : notificationSet)
+                                    for (GPSUpdate listener : notificationSet) {
                                         listener.receiveUpdate(finaledData);
+                                        Log.d("GPS", "Sending GPS update to " + listener.toString());
+                                    }
                                 }
                             }
                         });

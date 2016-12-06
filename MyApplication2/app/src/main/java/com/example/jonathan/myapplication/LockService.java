@@ -39,6 +39,7 @@ public class LockService extends Service implements GPSUpdate {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Let it continue running until it is stopped.
+        Log.d("LockService", "starting lock service " + this.toString());
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (locationHandler != null){
             locationHandler.subscribeUpdates(this);
@@ -68,6 +69,7 @@ public class LockService extends Service implements GPSUpdate {
     }
 
     public void receiveUpdate(GPSData data){
+        Log.d("Alarm Service", this.toString()+ " GPS update");
         // Just in case the initial data was not available when lock was set
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (initialPolling) {
@@ -125,6 +127,7 @@ public class LockService extends Service implements GPSUpdate {
     }
 
     public void gpsDisconnected(){
+        Log.d("LockService", toString() + " received GPS disconnect signal.");
         //Toast.makeText(this, "GPS Disconnected", Toast.LENGTH_LONG).show();
         onDestroy();
     }
@@ -132,6 +135,7 @@ public class LockService extends Service implements GPSUpdate {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("LockService", "Destroying: " + this.toString());
         this.isRunning = false;
         Toast.makeText(this, "Alarm Deactivated", Toast.LENGTH_LONG).show();
         LocationHandler locationHandler = Configuration.getLocationHandler();

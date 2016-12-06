@@ -7,6 +7,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("MainActivity", this.toString() + " onCreate");
         setContentView(R.layout.activity_main);
         Configuration.setMainActivity(this);
         this.lockService = Configuration.getLockIntent();
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d("MainActivity", this.toString() + " onStart");
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (locationHandler == null) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
 
     protected void onDestroy() {
         super.onDestroy();
-
+        Log.d("MainActivity", this.toString() + " onDestroy");
         // set terminate flag to prevent login screen from appearing after connection is terminated
         Configuration.setTerminate(true);
         LocationHandler handler = Configuration.getLocationHandler();
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void DisplaySetting(View view) {
+        Log.d("MainActivity", this.toString() + " logout button");
         LocationHandler locationHandler = Configuration.getLocationHandler();
         LockService lockService = Configuration.getLockService();
         if (lockService != null)
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void DisplayLocation(View view) {
+        Log.d("MainActivity", this.toString() + " map button");
         final Intent intent = new Intent(this, GPSLocation.class);
 
         //Test to see if there is a recent location update
@@ -127,63 +132,67 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
      * Called when the user clicks the Send button
      */
     public void ActivateLock(View view) {
+        Log.d("MainActivity", this.toString() + " lock button");
         // Check to make sure there's a connection before attempting to start lock service
         LocationHandler locationHandler = Configuration.getLocationHandler();
         if (locationHandler == null)
             this.gpsDisconnected();
+        else {
 
-        final long msToMinutes = 1000 * 60;
+            final long msToMinutes = 1000 * 60;
 
-        if (Configuration.getLockService() == null || (Configuration.getLockService() != null &&
-                !Configuration.getLockService().getRunning())) {
-            this.lockService = new Intent(this, LockService.class);
-            startService(this.lockService);
-            Configuration.setLockIntent(this.lockService);
+            if (Configuration.getLockService() == null || (Configuration.getLockService() != null &&
+                    !Configuration.getLockService().getRunning())) {
+                this.lockService = new Intent(this, LockService.class);
+                startService(this.lockService);
+                Configuration.setLockIntent(this.lockService);
 
-            // arming popup
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("Device Armed");
-            alertDialog.setMessage("Location will be updated every " +
-                    Long.toString(locationHandler.getCheckInterval() /
-                            msToMinutes) + " minutes. " +
-                    "You can still manually update at any time by tapping the Location button. " +
-                    "Changes in location will trigger an alarm on your device.  " +
-                    "To exit armed mode, tap the lock again.");
-
-
-            alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            //maybe something is supposed to be here?
-                            //copy pasta
-                        }
-                    });
-            alertDialog.show();
-
-        } else {
-            stopService(this.lockService);
-            this.lockService = null;
-            Configuration.setLockIntent(this.lockService);
-
-            //disable popupdumm
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("Device Disarmed");
-            alertDialog.setMessage("By clicking this, you are disabling the alarm feature.");
+                // arming popup
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle("Device Armed");
+                alertDialog.setMessage("Location will be updated every " +
+                        Long.toString(locationHandler.getCheckInterval() /
+                                msToMinutes) + " minutes. " +
+                        "You can still manually update at any time by tapping the Location button. " +
+                        "Changes in location will trigger an alarm on your device.  " +
+                        "To exit armed mode, tap the lock again.");
 
 
-            alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            //maybe something is supposed to be here?
-                            //copy pasta
+                alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //maybe something is supposed to be here?
+                                //copy pasta
+                            }
+                        });
+                alertDialog.show();
 
-                        }
-                    });
-            alertDialog.show();
+            } else {
+                stopService(this.lockService);
+                this.lockService = null;
+                Configuration.setLockIntent(this.lockService);
+
+                //disable popupdumm
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle("Device Disarmed");
+                alertDialog.setMessage("By clicking this, you are disabling the alarm feature.");
+
+
+                alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //maybe something is supposed to be here?
+                                //copy pasta
+
+                            }
+                        });
+                alertDialog.show();
+            }
         }
     }
 
     public void alarmTrigger() {
+        Log.d("MainActivity", this.toString() + " triggering alarm");
         stopService(lockService);
         this.lockService = null;
         Configuration.setLockIntent(this.lockService);
@@ -192,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     }
 
     public void receiveUpdate(GPSData data) {
+        Log.d("MainActivity", this.toString() + " received gps update");
         if (data.valid) {
 
             battery = data.battery;
@@ -201,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
     }
 
     public void gpsDisconnected() {
+        Log.d("MainActivity", this.toString() + " gps disconnect signal");
         // Service has been disconnected.  Clear out configuration dealing with connection and
         // prompt user to reconnect.
 

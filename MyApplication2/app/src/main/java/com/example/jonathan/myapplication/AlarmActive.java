@@ -10,13 +10,17 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
 public class AlarmActive extends AppCompatActivity {
+    AlertDialog alertDialog;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("AlarmDialog", "Activating alarm "+ this.toString());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_active);
 
@@ -24,9 +28,9 @@ public class AlarmActive extends AppCompatActivity {
          * Called when gps moves in armed mode
          */
 
-        final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
+        mp = MediaPlayer.create(this, R.raw.alarm);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
@@ -51,10 +55,23 @@ public class AlarmActive extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         if (mp.isPlaying()) {
                             mp.stop();
-                            mp.release();
                         }
+                        Log.d("AlarmDialog", "Deactivating alarm "+ this.toString());
                     }
                 });
         alertDialog.show();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("AlarmDialog", "onStop dismissing alarm.");
+        super.onDestroy();
+        if (alertDialog != null) {
+            alertDialog.dismiss();
+            mp.stop();
+            mp.reset();
+            mp.release();
+            mp = null;
+        }
     }
 }

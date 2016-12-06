@@ -1,6 +1,7 @@
 package com.example.jonathan.myapplication;
 
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * Created by dave on 11/18/2016.
@@ -24,6 +25,7 @@ public class Configuration {
     }
 
     public static void setLocationHandler(LocationHandler locationHandler){
+        Log.d("Configuration", " setting locationHandler");
         synchronized (ConfigurationLock){
             Configuration.locationHandler = locationHandler;
         }
@@ -32,6 +34,7 @@ public class Configuration {
     public static void setLocationHandlerIfNull(LocationHandler locationHandler){
         synchronized (ConfigurationLock){
             if (Configuration.locationHandler == null)
+                Log.d("Configuration", " setting locationHandler");
                 Configuration.locationHandler = locationHandler;
         }
     }
@@ -41,20 +44,36 @@ public class Configuration {
     }
 
     public static void setLockService(LockService lockService){
+        Log.d("Configuration", " setting lockservice");
         Configuration.lockService = lockService;
     }
 
     public static MainActivity getMainActivity() { return Configuration.mainActivity; }
 
     public static void setMainActivity(MainActivity mainActivity){
-        Configuration.mainActivity = mainActivity;
+        synchronized (ConfigurationLock) {
+            if (Configuration.mainActivity != mainActivity && Configuration.mainActivity != null) {
+                LocationHandler handler = Configuration.locationHandler;
+                if (handler != null)
+                    handler.unsubscribeUpdates(Configuration.mainActivity);
+            }
+            Log.d("Configuration", " setting mainActivity");
+            Configuration.mainActivity = mainActivity;
+        }
     }
 
     public static Intent getLockIntent() { return Configuration.lockIntent; }
 
-    public static void setLockIntent(Intent lockIntent) { Configuration.lockIntent = lockIntent; }
+    public static void setLockIntent(Intent lockIntent) {
+        Log.d("Configuration", " setting lockIntent");
+        Configuration.lockIntent = lockIntent;
+    }
 
     public static boolean getTerminate() { return Configuration.terminate; }
 
-    public static void setTerminate(boolean terminate) { Configuration.terminate = terminate; }
+    public static void setTerminate(boolean terminate) {
+        Log.d("Configuration", " setting terminate to " + terminate);
+        Configuration.terminate = terminate;
+    }
+
 }
