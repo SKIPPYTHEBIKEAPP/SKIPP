@@ -54,15 +54,10 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         }
     }
 
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("MainActivity", this.toString() + " onDestroy");
-        // set terminate flag to prevent login screen from appearing after connection is terminated
-        Configuration.setTerminate(true);
-        LocationHandler handler = Configuration.getLocationHandler();
-        if (handler != null){
-            handler.logout();
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateLock();
     }
 
     /**
@@ -216,11 +211,19 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         // prompt user to reconnect.
 
         // Restart activity to prompt re-login
-        if (!Configuration.getTerminate()) {
-            Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.",
-                    Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+        Toast.makeText(this, "GPS Location Service has Disconnected.  Please re-login.",
+                Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
+
+    private void updateLock() {
+        if (Configuration.getLockService() != null) {
+            imgButton.setVisibility(View.INVISIBLE);
+            imgButton2.setVisibility(View.VISIBLE);
+        } else {
+            imgButton.setVisibility(View.VISIBLE);
+            imgButton2.setVisibility(View.INVISIBLE);
         }
     }
 
