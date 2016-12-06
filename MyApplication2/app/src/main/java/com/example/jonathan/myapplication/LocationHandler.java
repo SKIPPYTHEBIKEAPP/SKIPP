@@ -319,18 +319,20 @@ public class LocationHandler {
                     GPSData data;
                     do {
                         data = this.locationDataSource.getUpdate();
-                        boolean duplicateData = ((previousGoodData != null &&
-                                                 previousGoodData.valid) &&
-                                data.timeStamp.compareTo(previousGoodData.timeStamp) == 0);
-                        if (!data.valid || duplicateData)
-                            try {
-                                // Data is invalid, wait a certain amount of time and try again
-                                Log.d("GPS", "Invalid or duplicate data received.  Waiting for retry.");
-                                Thread.sleep(Configuration.invalidDataRecheckInterval);
-                                Log.d("GPS", "Re-trying to get valid GPS data.");
-                            } catch (Exception e) {
-                                // sleep interrupted
-                            }
+                        if (data.valid) {
+                            boolean duplicateData = ((previousGoodData != null &&
+                                    previousGoodData.valid) &&
+                                    data.timeStamp.compareTo(previousGoodData.timeStamp) == 0);
+                            if (!data.valid || duplicateData)
+                                try {
+                                    // Data is invalid, wait a certain amount of time and try again
+                                    Log.d("GPS", "Invalid or duplicate data received.  Waiting for retry.");
+                                    Thread.sleep(Configuration.invalidDataRecheckInterval);
+                                    Log.d("GPS", "Re-trying to get valid GPS data.");
+                                } catch (Exception e) {
+                                    // sleep interrupted
+                                }
+                        }
                     } while (!data.valid && connected == true);
                     Log.d("GPS", "Valid GPS data receieved: " + data.toString());
                     if (data.valid) {     // Save result for future retrieval if data is valid
