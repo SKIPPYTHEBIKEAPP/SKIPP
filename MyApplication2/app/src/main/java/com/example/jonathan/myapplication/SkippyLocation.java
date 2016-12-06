@@ -1,6 +1,7 @@
 package com.example.jonathan.myapplication;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,7 +57,10 @@ public class SkippyLocation implements LocationDataSource {
         try {
             String gpsString = device.getStringVariable("gps_data");
             return gpsDataParser(gpsString);
-        } catch (Exception e) { return null; }
+        } catch (Exception e) {
+            Log.d("SkippyLocation", "Exception: " + e.getMessage());
+            return GPSData.invalidData();
+        }
     }
 
     public GPSData gpsDataParser(String gpsString) {
