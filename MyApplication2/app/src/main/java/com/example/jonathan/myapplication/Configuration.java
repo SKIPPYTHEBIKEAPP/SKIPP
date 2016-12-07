@@ -10,7 +10,7 @@ import android.util.Log;
 public class Configuration {
     private static Object ConfigurationLock = new Object();
     private static LocationHandler locationHandler = null;
-    public static final long defaultAutomaticRefresh = 200000;       // in ms
+    public static final long defaultAutomaticRefresh = 20000;       // in ms
     public static final long invalidDataRecheckInterval = 5000;     // in ms
     public static final long acceptableMovement = 10;               // in meters
     private static LockService lockService = null;

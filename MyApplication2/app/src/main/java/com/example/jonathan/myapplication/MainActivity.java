@@ -4,11 +4,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaPlayer;
+import android.os.PowerManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -191,8 +195,47 @@ public class MainActivity extends AppCompatActivity implements GPSUpdate {
         stopService(lockService);
         this.lockService = null;
         Configuration.setLockIntent(this.lockService);
-        Intent intent = new Intent(this, AlarmActive.class);
-        startActivity(intent);
+
+        Log.d("AlarmDialog", "Activating alarm "+ this.toString());
+        //setContentView(R.layout.activity_alarm_active);
+
+        /**
+         * Called when gps moves in armed mode
+         */
+
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.alarm);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        alertDialog.setCanceledOnTouchOutside(true);
+
+        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mp.stop();
+                Log.d("AlarmDialog", "onCancel");
+                updateLock();
+            }
+        });
+
+        alertDialog.setTitle("Alarm Triggered!!!");
+        alertDialog.setMessage("The location of your device has changed. " +
+                "Press okay OK to halt alarm sound. ");
+        mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mp.start();
+
+        //"OK" stops sound, at least it should...
+        alertDialog.setButton(alertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mp.stop();
+                        Log.d("AlarmDialog", "Button pressed/deactivating alarm "+ this.toString());
+                        updateLock();
+                    }
+                });
+        alertDialog.show();
     }
 
     public void receiveUpdate(GPSData data) {

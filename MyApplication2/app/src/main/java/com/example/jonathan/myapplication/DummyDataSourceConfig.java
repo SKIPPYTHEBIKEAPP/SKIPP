@@ -20,6 +20,6 @@ public class DummyDataSourceConfig {
         invalidDataProbability = .05;
         connectFailProbability = 0.0;
         invalidLogin = false;
-        intervalBigJump = 15;
+        intervalBigJump = 2;
     }
 }

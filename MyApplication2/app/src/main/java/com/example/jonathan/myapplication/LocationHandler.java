@@ -167,6 +167,17 @@ public class LocationHandler {
             }
         if (this.connected == false)
             throw new Exception ("No error, but not connected.  This shouldn't happen.");
+        int dataWaitCounter = 0;
+        while (this.isDataStale())
+            try {
+                dataWaitCounter++;
+                if (dataWaitCounter > 10)
+                    throw new Exception("Error getting data from device.  Please re-locate " +
+                    "device and try again.");
+                Thread.sleep(300);
+                Log.d("GPS Connect", "Waiting for connection");
+            } catch (Exception e) {// sleep interrupted}
+            }
     }
 
     // Stop helper thread and logout from data source

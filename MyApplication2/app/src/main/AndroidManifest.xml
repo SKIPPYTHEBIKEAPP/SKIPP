@@ -71,11 +71,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".AlarmActive"
-            android:label="@string/title_activity_alarm_active"
-            android:theme="@style/AppTheme.NoActionBar" />
-
     </application>
 
 </manifest>

@@ -107,6 +107,8 @@ public class LockService extends Service implements GPSUpdate {
                 Log.d("LockService", "Device outside range.  Sounding alarm.");
                 confirmLocationCount = 0;
                 confirmMovement = false;
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
                 if (Configuration.getMainActivity() != null)
                     Configuration.getMainActivity().alarmTrigger();
             } else {

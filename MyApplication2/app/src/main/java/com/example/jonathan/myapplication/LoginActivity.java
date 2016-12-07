@@ -165,6 +165,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
+            mEmailSignInButton.setEnabled(true);
         } else if (!loginInProgress){
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -197,6 +198,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             loginInProgress = false;
+            finish();
         }
     }
 
