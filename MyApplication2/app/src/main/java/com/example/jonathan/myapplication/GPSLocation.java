@@ -57,6 +57,14 @@ public class GPSLocation extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocationHandler locationHandler = Configuration.getLocationHandler();
+        if (mMap != null && locationHandler != null)
+            receiveUpdate(locationHandler.retrieveLastGPSData());
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
